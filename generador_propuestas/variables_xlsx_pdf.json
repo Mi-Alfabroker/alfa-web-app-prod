@@ -1,0 +1,44 @@
+{
+  "texto": {
+    "[ciudad]": "Fusagasuga",
+    "[direccion]": "Calle 123 # 45-67",
+    "[nombre_cop]": "Conjunto de don Manuel",
+    "[nit]": "1234567890",
+    "[vlr_bien_comun]": "$11.000.000.000",
+    "[presentado_a]": "Conjunto de don Manuel",
+    "[nombre_asesor]": "Felipe Diaz",
+    "[numero_asesor]": "1234567890",
+    "[dt_a1]": "3%",
+    "[t_dt_a1]": "VALOR DE LA PERDIDA",
+    "[vlr_prima_a1]": "$100.000.000",
+    "[respaldo_aseg_1]": "MEPRESA DUEÑA DE LA ASEGURADORA",
+    "[asist_acomun_1]": "15",
+    "[cobert_dif_1_1]": "No aplica demerito por uso",
+    "[cobert_dif_1_2]": "No aplica demerito por uso",
+    "[año_const]": "2025",
+    "[estrato]": "6",
+    "[n_torres]": "3",
+    "[n_sotanos]": "1",
+    "[n_pisos]": "10",
+    "[n_casas]": "10",
+    "[n_apart]": "10",
+    "[n_locales]": "10",
+    "[vlr_ed_area_comun]": "100000000",
+    "[vlr_ed_area_priv]": "100000000",
+    "[vlr_maq_equip]": "100000000",
+    "[vlr_equip_elec]": "100000000",
+    "[vlr_muebles_ens]": "100000000",
+    "[infsec_ed_area_comun]": "100000000", //1 - valor asegurado / valor real
+    "[infsec_ed_area_priv]": "100000000",
+    "[infsec_maq_equip]": "100000000",
+    "[infsec_equip_elec]": "100000000",
+    "[infsec_muebles_ens]": "100000000"
+  },
+  "imagenes": {
+    "img_aseg_1": "imagenes_aseguradoras/mapfre.png",
+    "pais_aseg_1": "ruta imagen del pais de la aseguradora"
+  }
+}
+
+
+

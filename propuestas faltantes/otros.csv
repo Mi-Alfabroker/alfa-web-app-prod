@@ -1,0 +1,169 @@
+Generales;;Otros Estado
+;;Otros Tipo de Seguro
+;;Otros Bien Asegurado
+;;Otros Valor del Bien o Monto a Asegurar
+;;Otros Detalles del  Bien Asegurado
+;;Otros Comentarios 
+Opciones de Seguro;;Tasa Financiación 
+;Aseguradora 1;Nombre Aseguradora
+;Aseguradora 1;Valor Asegurado Inmueble
+;Aseguradora 1;Valor Asegurado Contenidos Normales
+;Aseguradora 1;Valor Asegurado Contenidos Especiales
+;Aseguradora 1;Valor Asegurado Equipo Eléctrico y Eléctronico
+;;
+;Aseguradora 1;Valor Deducible DañosTerremoto
+;Aseguradora 1;Tipo Deducible Daños Terremoto
+;Aseguradora 1;Minimo Deducible Daños Terremoto
+;;
+;Aseguradora 1;Valor Deducible Daños AMIT/Terrorismo
+;Aseguradora 1;Tipo Deducible Daños AMIT/Terrorismo
+;Aseguradora 1;Minimo Deducible Daños AMIT/Terrorismo
+;;
+;Aseguradora 1;Valor Deducible Daños Demas Eventos
+;Aseguradora 1;Tipo Deducible Daños Terremoto
+;Aseguradora 1;Minimo Deducible Daños Terremoto
+;;
+;Aseguradora 1;Valor Deducible Hurto Contenidos Normales
+;Aseguradora 1;Tipo Deducible Hurto Contenidos Normales
+;Aseguradora 1;Minimo Deducible Hurto Contenidos Normales
+;;
+;Aseguradora 1;Valor Deducible Hurto Contenidos Especiales
+;Aseguradora 1;Tipo Deducible Hurto Contenidos Especiales
+;Aseguradora 1;Minimo Deducible Hurto Contenidos Especiales
+;;
+;Aseguradora 1;Valor Deducible Hurto Equipo Eléctrico y Eléctronico
+;Aseguradora 1;Tipo Deducible Hurto Equipo Eléctrico y Eléctronico
+;Aseguradora 1;Minimo Deducible Hurto Equipo Eléctrico y Eléctronico
+;;
+;Aseguradora 1;Cobertura Adicionales (Check 1)
+;Aseguradora 1;Cobertura Adicionales (Check 2)
+;Aseguradora 1;Cobertura Adicionales (Check 3)
+;;
+;Aseguradora 1;Valor Total Prima Anual IVA Incluido
+;Aseguradora 1;Valor Cuota a 5 cuotas (Calculado)
+;Aseguradora 1;Valor Cuota a 8 cuotas (Calculado)
+;Aseguradora 1;Valor Cuota a 11 cuotas (Calculado)
+;;
+;Aseguradora 2;Nombre Aseguradora
+;Aseguradora 2;Valor Asegurado Inmueble
+;Aseguradora 2;Valor Asegurado Contenidos Normales
+;Aseguradora 2;Valor Asegurado Contenidos Especiales
+;Aseguradora 2;Valor Asegurado Equipo Eléctrico y Eléctronico
+;;
+;Aseguradora 2;Valor Deducible DañosTerremoto
+;Aseguradora 2;Tipo Deducible Daños Terremoto
+;Aseguradora 2;Minimo Deducible Daños Terremoto
+;;
+;Aseguradora 2;Valor Deducible Daños AMIT/Terrorismo
+;Aseguradora 2;Tipo Deducible Daños AMIT/Terrorismo
+;Aseguradora 2;Minimo Deducible Daños AMIT/Terrorismo
+;;
+;Aseguradora 2;Valor Deducible Daños Demas Eventos
+;Aseguradora 2;Tipo Deducible Daños Terremoto
+;Aseguradora 2;Minimo Deducible Daños Terremoto
+;;
+;Aseguradora 2;Valor Deducible Hurto Contenidos Normales
+;Aseguradora 2;Tipo Deducible Hurto Contenidos Normales
+;Aseguradora 2;Minimo Deducible Hurto Contenidos Normales
+;;
+;Aseguradora 2;Valor Deducible Hurto Contenidos Especiales
+;Aseguradora 2;Tipo Deducible Hurto Contenidos Especiales
+;Aseguradora 2;Minimo Deducible Hurto Contenidos Especiales
+;;
+;Aseguradora 2;Valor Deducible Hurto Equipo Eléctrico y Eléctronico
+;Aseguradora 2;Tipo Deducible Hurto Equipo Eléctrico y Eléctronico
+;Aseguradora 2;Minimo Deducible Hurto Equipo Eléctrico y Eléctronico
+;;
+;Aseguradora 2;Cobertura Adicionales (Check 1)
+;Aseguradora 2;Cobertura Adicionales (Check 2)
+;Aseguradora 2;Cobertura Adicionales (Check 3)
+;;
+;Aseguradora 2;Valor Total Prima Anual IVA Incluido
+;Aseguradora 2;Valor Cuota a 5 cuotas (Calculado)
+;Aseguradora 2;Valor Cuota a 8 cuotas (Calculado)
+;Aseguradora 2;Valor Cuota a 11 cuotas (Calculado)
+;;
+;Aseguradora 3;Nombre Aseguradora
+;Aseguradora 3;Valor Asegurado Inmueble
+;Aseguradora 3;Valor Asegurado Contenidos Normales
+;Aseguradora 3;Valor Asegurado Contenidos Especiales
+;Aseguradora 3;Valor Asegurado Equipo Eléctrico y Eléctronico
+;;
+;Aseguradora 3;Valor Deducible DañosTerremoto
+;Aseguradora 3;Tipo Deducible Daños Terremoto
+;Aseguradora 3;Minimo Deducible Daños Terremoto
+;;
+;Aseguradora 3;Valor Deducible Daños AMIT/Terrorismo
+;Aseguradora 3;Tipo Deducible Daños AMIT/Terrorismo
+;Aseguradora 3;Minimo Deducible Daños AMIT/Terrorismo
+;;
+;Aseguradora 3;Valor Deducible Daños Demas Eventos
+;Aseguradora 3;Tipo Deducible Daños Terremoto
+;Aseguradora 3;Minimo Deducible Daños Terremoto
+;;
+;Aseguradora 3;Valor Deducible Hurto Contenidos Normales
+;Aseguradora 3;Tipo Deducible Hurto Contenidos Normales
+;Aseguradora 3;Minimo Deducible Hurto Contenidos Normales
+;;
+;Aseguradora 3;Valor Deducible Hurto Contenidos Especiales
+;Aseguradora 3;Tipo Deducible Hurto Contenidos Especiales
+;Aseguradora 3;Minimo Deducible Hurto Contenidos Especiales
+;;
+;Aseguradora 3;Valor Deducible Hurto Equipo Eléctrico y Eléctronico
+;Aseguradora 3;Tipo Deducible Hurto Equipo Eléctrico y Eléctronico
+;Aseguradora 3;Minimo Deducible Hurto Equipo Eléctrico y Eléctronico
+;;
+;Aseguradora 3;Cobertura Adicionales (Check 1)
+;Aseguradora 3;Cobertura Adicionales (Check 2)
+;Aseguradora 3;Cobertura Adicionales (Check 3)
+;;
+;Aseguradora 3;Valor Total Prima Anual IVA Incluido
+;Aseguradora 3;Valor Cuota a 5 cuotas (Calculado)
+;Aseguradora 3;Valor Cuota a 8 cuotas (Calculado)
+;Aseguradora 3;Valor Cuota a 11 cuotas (Calculado)
+Entrega Poliza;;Hogar Nombre de Aseguradora
+;;Hogar Valor Inmueble
+;;Hogar Valor Contenidos Normales Asegurado
+;;HogarValor Contenidos Especiales Asegurado
+;;Hogar Valor Equipo Electrónico Asegurado
+;;Hogar Valor Maquinaria y Equipo Asegurado
+;;Hogar Valor Responsabilidad Civil Asegurado
+;;Hogar Deducible Terremoto Temblor
+;;Valor Deducible DañosTerremoto
+;;Tipo Deducible Daños Terremoto
+;;Minimo Deducible Daños Terremoto
+;;
+;;Valor Deducible Daños AMIT/Terrorismo
+;;Tipo Deducible Daños AMIT/Terrorismo
+;;Minimo Deducible Daños AMIT/Terrorismo
+;;
+;;Valor Deducible Daños Demas Eventos
+;;Tipo Deducible Daños Terremoto
+;;Minimo Deducible Daños Terremoto
+;;
+;;Valor Deducible Hurto Contenidos Normales
+;;Tipo Deducible Hurto Contenidos Normales
+;;Minimo Deducible Hurto Contenidos Normales
+;;
+;;Valor Deducible Hurto Contenidos Especiales
+;;Tipo Deducible Hurto Contenidos Especiales
+;;Minimo Deducible Hurto Contenidos Especiales
+;;
+;;Valor Deducible Hurto Equipo Eléctrico y Eléctronico
+;;Tipo Deducible Hurto Equipo Eléctrico y Eléctronico
+;;Minimo Deducible Hurto Equipo Eléctrico y Eléctronico
+;;
+;;Cobertura Adicionales (Check 1)
+;;Cobertura Adicionales (Check 2)
+;;Cobertura Adicionales (Check 3)
+;;Hogar Valor de Prima Total
+;;Hogar Valor de Prima Neta
+;;Hogar Valor de Otros Costos
+;;Hogar Valor de IVA
+;;Hogar Fecha de Inicio Vigencia
+;;Hogar Fecha de Fin Vigencia
+;;Hogar Medio de Pago
+;;Hogar Estado de Cartera
+;;Hogar Financiación
+;;Hogar Plan de Pagos
+;;Hogar Ingreso por Comisión Percibido

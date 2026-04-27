@@ -1,0 +1,185 @@
+Generales;;Fecha Actual
+;;Año Actual - Año siguiente
+;;Vehículos Tipo de Vehiculo
+;;Vehículos Placa
+;;Vehículos Marca
+;;Vehículos Serie-Referencia
+;;Vehículos Año Modelo
+;;Vehículos Año de nacimiento conductor
+;;Vehículos Codigo Fasecolda
+;;Vehículos Valor Vehículo 
+;;Vehículos Valor Accesorios Avaluo
+;;Vehículos Comentarios o Detalles 
+Opciones de Seguro;;Tasa Financiación 
+;Aseguradora 1;Nombre Aseguradora
+;Aseguradora 1;Valor Asegurado vehiculo
+;Aseguradora 1;Valor Asegurado Accesorios Adicionales
+;Aseguradora 1;Valor Asegurado Resp Civil
+;;
+;Aseguradora 1;Valor Deducible Daños Perdida Parcial
+;Aseguradora 1;Tipo Deducible Daños Perdida Parcial
+;Aseguradora 1;Minimo Deducible Daños Perdida Parcial
+;;
+;Aseguradora 1;Valor Deducible Daños Perdida Total
+;Aseguradora 1;Tipo Deducible Daños Perdida Total
+;Aseguradora 1;Minimo Deducible Daños Perdida Total
+;;
+;Aseguradora 1;Valor Deducible Daños Terremoto
+;Aseguradora 1;Tipo Deducible Daños Terremoto
+;Aseguradora 1;Minimo Deducible Daños Terremoto
+;;
+;Aseguradora 1;Valor Deducible Hurto Perdida Parcial
+;Aseguradora 1;Tipo Deducible Hurto Perdida Parcial
+;Aseguradora 1;Minimo Deducible Hurto Perdida Parcial
+;;
+;Aseguradora 1;Valor Deducible Hurto Perdida Total
+;Aseguradora 1;Tipo Deducible Hurto Perdida Total
+;Aseguradora 1;Minimo Deducible Hurto Perdida Total
+;;
+;Aseguradora 1;Deducible Responsabilidad Civil
+;;
+;Aseguradora 1;Sublimite RC Daños a Bienes Terceros
+;Aseguradora 1;Sublimite RC Amparo Patrimonial
+;Aseguradora 1;Sublimite RC Muerte o lesión a una persona
+;Aseguradora 1;Sublimite RC Muerte o lesión a dos o mas personas
+;;
+;Aseguradora 1;Cobertura Adicionales (Check 1)
+;Aseguradora 1;Cobertura Adicionales (Check 2)
+;Aseguradora 1;Cobertura Adicionales (Check 3)
+;Aseguradora 1;Cobertura Adicionales (Check 4)
+;Aseguradora 1;Cobertura Adicionales (Check 5)
+;Aseguradora 1;Cobertura Adicionales (Check 6)
+;Aseguradora 1;Cobertura Adicionales (Check 7)
+;;
+;Aseguradora 1;Valor Total Prima Anual IVA Incluido
+;Aseguradora 1;Valor Cuota a 5 cuotas (Calculado)
+;Aseguradora 1;Valor Cuota a 8 cuotas (Calculado)
+;Aseguradora 1;Valor Cuota a 11 cuotas (Calculado)
+;;
+;Aseguradora 2;Nombre Aseguradora
+;Aseguradora 2;Valor Asegurado vehiculo
+;Aseguradora 2;Valor Asegurado Accesorios Adicionales
+;Aseguradora 2;Valor Asegurado Resp Civil
+;;
+;Aseguradora 2;Valor Deducible Daños Perdida Parcial
+;Aseguradora 2;Tipo Deducible Daños Perdida Parcial
+;Aseguradora 2;Minimo Deducible Daños Perdida Parcial
+;;
+;Aseguradora 2;Valor Deducible Daños Perdida Total
+;Aseguradora 2;Tipo Deducible Daños Perdida Total
+;Aseguradora 2;Minimo Deducible Daños Perdida Total
+;;
+;Aseguradora 2;Valor Deducible Daños Terremoto
+;Aseguradora 2;Tipo Deducible Daños Terremoto
+;Aseguradora 2;Minimo Deducible Daños Terremoto
+;;
+;Aseguradora 2;Valor Deducible Hurto Perdida Parcial
+;Aseguradora 2;Tipo Deducible Hurto Perdida Parcial
+;Aseguradora 2;Minimo Deducible Hurto Perdida Parcial
+;;
+;Aseguradora 2;Valor Deducible Hurto Perdida Total
+;Aseguradora 2;Tipo Deducible Hurto Perdida Total
+;Aseguradora 2;Minimo Deducible Hurto Perdida Total
+;;
+;Aseguradora 2;Deducible Responsabilidad Civil
+;;
+;Aseguradora 2;Sublimite RC Daños a Bienes Terceros
+;Aseguradora 2;Sublimite RC Amparo Patrimonial
+;Aseguradora 2;Sublimite RC Muerte o lesión a una persona
+;Aseguradora 2;Sublimite RC Muerte o lesión a dos o mas personas
+;;
+;Aseguradora 2;Cobertura Adicionales (Check 1)
+;Aseguradora 2;Cobertura Adicionales (Check 2)
+;Aseguradora 2;Cobertura Adicionales (Check 3)
+;Aseguradora 2;Cobertura Adicionales (Check 4)
+;Aseguradora 2;Cobertura Adicionales (Check 5)
+;Aseguradora 2;Cobertura Adicionales (Check 6)
+;Aseguradora 2;Cobertura Adicionales (Check 7)
+;;
+;Aseguradora 2;Valor Total Prima Anual IVA Incluido
+;Aseguradora 2;Valor Cuota a 5 cuotas (Calculado)
+;Aseguradora 2;Valor Cuota a 8 cuotas (Calculado)
+;Aseguradora 2;Valor Cuota a 11 cuotas (Calculado)
+;;
+;Aseguradora 3;Nombre Aseguradora
+;Aseguradora 3;Valor Asegurado vehiculo
+;Aseguradora 3;Valor Asegurado Accesorios Adicionales
+;Aseguradora 3;Valor Asegurado Resp Civil
+;;
+;Aseguradora 3;Valor Deducible Daños Perdida Parcial
+;Aseguradora 3;Tipo Deducible Daños Perdida Parcial
+;Aseguradora 3;Minimo Deducible Daños Perdida Parcial
+;;
+;Aseguradora 3;Valor Deducible Daños Perdida Total
+;Aseguradora 3;Tipo Deducible Daños Perdida Total
+;Aseguradora 3;Minimo Deducible Daños Perdida Total
+;;
+;Aseguradora 3;Valor Deducible Daños Terremoto
+;Aseguradora 3;Tipo Deducible Daños Terremoto
+;Aseguradora 3;Minimo Deducible Daños Terremoto
+;;
+;Aseguradora 3;Valor Deducible Hurto Perdida Parcial
+;Aseguradora 3;Tipo Deducible Hurto Perdida Parcial
+;Aseguradora 3;Minimo Deducible Hurto Perdida Parcial
+;;
+;Aseguradora 3;Valor Deducible Hurto Perdida Total
+;Aseguradora 3;Tipo Deducible Hurto Perdida Total
+;Aseguradora 3;Minimo Deducible Hurto Perdida Total
+;;
+;Aseguradora 3;Deducible Responsabilidad Civil
+;;
+;Aseguradora 3;Sublimite RC Daños a Bienes Terceros
+;Aseguradora 3;Sublimite RC Amparo Patrimonial
+;Aseguradora 3;Sublimite RC Muerte o lesión a una persona
+;Aseguradora 3;Sublimite RC Muerte o lesión a dos o mas personas
+;;
+;Aseguradora 3;Cobertura Adicionales (Check 1)
+;Aseguradora 3;Cobertura Adicionales (Check 2)
+;Aseguradora 3;Cobertura Adicionales (Check 3)
+;Aseguradora 3;Cobertura Adicionales (Check 4)
+;Aseguradora 3;Cobertura Adicionales (Check 5)
+;Aseguradora 3;Cobertura Adicionales (Check 6)
+;Aseguradora 3;Cobertura Adicionales (Check 7)
+;;
+;Aseguradora 3;Valor Total Prima Anual IVA Incluido
+;Aseguradora 3;Valor Cuota a 5 cuotas (Calculado)
+;Aseguradora 3;Valor Cuota a 8 cuotas (Calculado)
+;Aseguradora 3;Valor Cuota a 11 cuotas (Calculado)
+Entrega Poliza;;Vehículos Numero de Poliza
+;;Vehículos Nombre de Aseguradora
+;;Vehículos Valor Vehículo Asegurado
+;;Vehículos Valor Accesorios Asegurado
+;;Valor Deducible Daños Perdida Parcial
+;;Tipo Deducible Daños Perdida Parcial
+;;Minimo Deducible Daños Perdida Parcial
+;;Valor Deducible Daños Perdida Total
+;;Tipo Deducible Daños Perdida Total
+;;Minimo Deducible Daños Perdida Total
+;;Valor Deducible Daños Terremoto
+;;Tipo Deducible Daños Terremoto
+;;Minimo Deducible Daños Terremoto
+;;Valor Deducible Hurto Perdida Parcial
+;;Tipo Deducible Hurto Perdida Parcial
+;;Minimo Deducible Hurto Perdida Parcial
+;;Valor Deducible Hurto Perdida Total
+;;Tipo Deducible Hurto Perdida Total
+;;Minimo Deducible Hurto Perdida Total
+;;Vehículos Valor Asegurado Responsabilidad Civil
+;;Vehículos Deducible Responsabilidad Civil Amparo Basico
+;;Vehículos Sublimite RC Daños Bienes  a Terceros
+;;Vehículos Sublimite RC Amparo Patrimonial
+;;Vehículos Sublimite RC Muerte o Lesión a una persona
+;;Vehículos Sublimite RC Muerte o Lesión a dos o más personas
+;;Vehículos Coberturas Adicionales
+;;Vehículos Asistencias
+;;Vehículos Valor de Prima Total
+;;Vehículos Valor de Prima Neta
+;;Vehículos Valor de Otros Costos
+;;Vehículos Valor de IVA
+;;Vehículos Fecha de Inicio Vigencia
+;;Vehículos Fecha de Fin Vigencia
+;;Vehículos Medio de Pago
+;;Vehículos Estado de Cartera
+;;Vehículos Financiación
+;;Vehículos Plan de Pagos
+;;Vehículos Ingreso por Comisión Percibido

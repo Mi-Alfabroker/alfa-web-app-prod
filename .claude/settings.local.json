@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(\\(Get-Content \"c:\\\\Striker-dev\\\\Alfabroker-admin-app\\\\frontend\\\\src\\\\routes\\\\propuestas\\\\copropiedad\\\\[id]\\\\generar\\\\+page.svelte\" | Measure-Object -Line\\).Lines)",
+      "Bash(where python *)",
+      "PowerShell(Get-Command python, python3, py -ErrorAction SilentlyContinue)",
+      "PowerShell($zip = [System.IO.Compression.ZipFile]::OpenRead\\('c:\\\\Striker-dev\\\\Alfabroker-admin-app\\\\backend\\\\app\\\\resources\\\\plantillas_xlsx\\\\propuesta_cop.xlsx'\\); $zip.Entries | Where-Object { $_.FullName -match 'sharedStrings|worksheets/' } | Select-Object FullName, Length; $zip.Dispose\\(\\))",
+      "PowerShell(Add-Type -Assembly 'System.IO.Compression.FileSystem'; $zip = [System.IO.Compression.ZipFile]::OpenRead\\('c:\\\\Striker-dev\\\\Alfabroker-admin-app\\\\backend\\\\app\\\\resources\\\\plantillas_xlsx\\\\propuesta_cop.xlsx'\\); $zip.Entries | Where-Object { $_.FullName -match 'sharedStrings|worksheets/sheet' } | Select-Object FullName, Length; $zip.Dispose\\(\\))",
+      "PowerShell(Add-Type -Assembly 'System.IO.Compression.FileSystem'; $path='c:\\\\Striker-dev\\\\Alfabroker-admin-app\\\\backend\\\\app\\\\resources\\\\plantillas_xlsx\\\\propuesta_cop.xlsx'; Test-Path $path)",
+      "PowerShell(Add-Type -Assembly 'System.IO.Compression.FileSystem' | Out-Null; $path='c:\\\\Striker-dev\\\\Alfabroker-admin-app\\\\backend\\\\app\\\\resources\\\\plantillas_xlsx\\\\propuesta_cop.xlsx'; $zip=[System.IO.Compression.ZipFile]::OpenRead\\($path\\); foreach\\($e in $zip.Entries\\){ Write-Output $e.FullName }; $zip.Dispose\\(\\))"
+    ]
+  }
+}

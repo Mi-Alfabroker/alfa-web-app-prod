@@ -1,0 +1,534 @@
+### ============================================================================
+### Alfa-Broker API - Test Endpoints (Updated with Copropiedad fields)
+### Use with VS Code REST Client extension or import to Postman/Insomnia
+### Base URL: http://localhost:5000
+### ============================================================================
+
+@baseUrl = http://localhost:5000
+
+
+### ============================================================================
+### HEALTH CHECK ENDPOINTS
+### ============================================================================
+
+### 1. API Health Check - Verificar que la API está corriendo
+GET {{baseUrl}}/health
+
+### 2. Database Health Check - Verificar conexión a PostgreSQL
+GET {{baseUrl}}/health/db
+
+### 3. Full System Health Check - Estado completo del sistema
+GET {{baseUrl}}/health/full
+
+
+### ============================================================================
+### ASEGURADORAS (Insurance Providers) - CRUD OPERATIONS
+### ============================================================================
+
+### 4. GET ALL - Obtener todas las aseguradoras
+GET {{baseUrl}}/api/aseguradoras
+
+### 5. GET BY ID - Obtener aseguradora por ID (cambiar el ID según necesites)
+GET {{baseUrl}}/api/aseguradoras/1
+
+### 6. GET BY ID - Probar con ID que no existe (debería retornar 404)
+GET {{baseUrl}}/api/aseguradoras/9999
+
+### 7. CREATE - Crear nueva aseguradora (COMPLETO con campos Copropiedad)
+POST {{baseUrl}}/api/aseguradoras
+Content-Type: application/json
+
+{
+    "nombre": "Seguros Copropiedad Test S.A.",
+    "numeral_asistencia": "800-COP-TEST",
+    "correo_comercial": "comercial@coptest.com",
+    "correo_reclamaciones": "reclamaciones@coptest.com",
+    "direccion_oficina": "Calle de Prueba #123, Ciudad Test",
+    "contacto_asignado": "Usuario de Prueba",
+    "ruta_logo": "/logos/seguros_cop_test.png",
+    "ruta_pais_logo": "/logos/flags/co.png",
+    "respaldo_aseguradora": "Grupo Financiero Test Internacional",
+    
+    "cop_asistencia_area_comun": "vidrieria,plomeria,cerrajeria,electricista",
+    "cop_asistencia_area_privada": "vidrieria,plomeria,cerrajeria",
+    
+    "cop_dm_deducible_terremoto": "3,porcentaje,50000000",
+    "cop_dm_deducible_inundacion": "2,porcentaje,30000000",
+    "cop_dm_deducible_incendio": "10,porcentaje,20000000",
+    "cop_dm_deducible_amit": "10,porcentaje,15000000",
+    "cop_dm_deducible_tuberia_vidrio": "10,porcentaje,10000000",
+    
+    "cop_di_deducible_maq_equipo": "10,porcentaje,5000000",
+    "cop_di_deducible_equipo_electronico": "10,porcentaje,5000000",
+    
+    "cop_scv_deducible_maq_equipo": "10,porcentaje,3000000",
+    "cop_scv_deducible_equipo_electronico": "10,porcentaje,3000000",
+    "cop_scv_deducible_dineros": "10,porcentaje,1000000",
+    "cop_scv_deducible_muebles": "10,porcentaje,2000000",
+    
+    "cop_da_deducible_amparo_basico": "10,porcentaje,5000000",
+    
+    "cop_rce_deducible_contratistas": "10,porcentaje,3000000",
+    "cop_rce_deducible_cruzada": "10,porcentaje,3000000",
+    "cop_rce_deducible_patronal": "10,porcentaje,3000000",
+    "cop_rce_deducible_parqueaderos": "10,porcentaje,2000000",
+    "cop_rce_deducible_gastos_medicos": "0,porcentaje,500000",
+    
+    "cop_rce_sublimite_contratistas": "30,porcentaje_evento,null",
+    "cop_rce_sublimite_cruzada": "30,porcentaje_evento,null",
+    "cop_rce_sublimite_patronal": "30,porcentaje_evento,null",
+    "cop_rce_sublimite_parqueaderos": "20,porcentaje_evento,null",
+    "cop_rce_sublimite_gastos_medicos": "10,porcentaje_evento,null",
+    
+    "cop_manejo_deducible_amparo_basico": "10,porcentaje,3000000",
+    "cop_tv_deducible_amparo_basico": "10,porcentaje,2000000"
+}
+
+### 8. CREATE - Crear aseguradora con datos mínimos (solo nombre requerido)
+POST {{baseUrl}}/api/aseguradoras
+Content-Type: application/json
+
+{
+    "nombre": "Seguros Mínimo"
+}
+
+### 9. CREATE - Error: sin nombre (debería retornar 400)
+POST {{baseUrl}}/api/aseguradoras
+Content-Type: application/json
+
+{
+    "correo_comercial": "test@test.com"
+}
+
+### 10. CREATE - Error: body vacío (debería retornar 400)
+POST {{baseUrl}}/api/aseguradoras
+Content-Type: application/json
+
+{}
+
+### 11. UPDATE - Actualizar campos básicos de aseguradora existente
+PUT {{baseUrl}}/api/aseguradoras/1
+Content-Type: application/json
+
+{
+    "nombre": "Seguros Alfa - Actualizado",
+    "numeral_asistencia": "800-NEW-NUMBER",
+    "contacto_asignado": "Nuevo Contacto Asignado"
+}
+
+### 12. UPDATE - Actualizar campos de Copropiedad
+PUT {{baseUrl}}/api/aseguradoras/1
+Content-Type: application/json
+
+{
+    "cop_asistencia_area_comun": "vidrieria,plomeria,cerrajeria,electricista,fumigacion",
+    "cop_dm_deducible_terremoto": "2.5,porcentaje,45000000",
+    "cop_rce_deducible_contratistas": "8,porcentaje,2500000",
+    "cop_rce_sublimite_contratistas": "25,porcentaje_evento,null"
+}
+
+### 13. UPDATE - Actualización parcial (solo un campo)
+PUT {{baseUrl}}/api/aseguradoras/2
+Content-Type: application/json
+
+{
+    "correo_comercial": "nuevo_correo@protecciontotal.com"
+}
+
+### 14. UPDATE - Error: ID no existe (debería retornar 404)
+PUT {{baseUrl}}/api/aseguradoras/9999
+Content-Type: application/json
+
+{
+    "nombre": "No existe"
+}
+
+### 15. DELETE - Eliminar aseguradora (¡CUIDADO! Cambiar ID)
+### Primero crea una de prueba con el endpoint #7 u #8, luego usa ese ID aquí
+DELETE {{baseUrl}}/api/aseguradoras/3
+
+### 16. DELETE - Error: ID no existe (debería retornar 404)
+DELETE {{baseUrl}}/api/aseguradoras/9999
+
+
+### ============================================================================
+### WORKFLOW DE PRUEBA COMPLETO
+### ============================================================================
+### Ejecutar en orden para probar el flujo completo:
+###
+### Paso 1: Verificar que la API y DB están funcionando
+###         → Ejecutar #1, #2, #3
+###
+### Paso 2: Ver datos iniciales (seed data con campos copropiedad)
+###         → Ejecutar #4 (debería mostrar 2 aseguradoras con todos los campos)
+###
+### Paso 3: Crear nueva aseguradora con todos los campos de copropiedad
+###         → Ejecutar #7 (guardar el ID retornado)
+###
+### Paso 4: Verificar creación
+###         → Ejecutar #4 (ahora debería mostrar 3 aseguradoras)
+###
+### Paso 5: Actualizar campos de copropiedad
+###         → Ejecutar #12 para actualizar deducibles/sublimites
+###
+### Paso 6: Verificar actualización
+###         → Ejecutar #5 con el ID actualizado
+###
+### Paso 7: Eliminar aseguradora de prueba
+###         → Ejecutar #15 con el ID del paso 3
+###
+### Paso 8: Verificar eliminación
+###         → Ejecutar #4 (vuelve a 2 aseguradoras)
+### ============================================================================
+
+
+### ============================================================================
+### AUTH (Authentication) - LOGIN / REFRESH / SESSION
+### ============================================================================
+
+@accessToken = 
+@refreshToken = 
+
+### 17. LOGIN - Obtener access y refresh token
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+    "usuario": "admin",
+    "clave": "admin123"
+}
+
+### 18. REFRESH - Renovar access token (usar refresh_token retornado)
+POST {{baseUrl}}/api/auth/refresh
+Content-Type: application/json
+
+{
+    "refresh_token": "{{refreshToken}}"
+}
+
+### 19. ME - Usuario autenticado actual
+GET {{baseUrl}}/api/auth/me
+Authorization: Bearer {{accessToken}}
+
+### ============================================================================
+### USUARIOS (Users) - CRUD OPERATIONS
+### ============================================================================
+
+### 20. GET ALL - Obtener todos los usuarios
+GET {{baseUrl}}/api/usuarios
+Authorization: Bearer {{accessToken}}
+
+### 18. GET ALL - Filtrar por tipo de usuario
+GET {{baseUrl}}/api/usuarios?tipo_usuario=CLIENTE
+
+### 19. GET BY ID - Obtener usuario por ID
+GET {{baseUrl}}/api/usuarios/1
+
+### 20. GET BY ID - Probar con ID que no existe (debería retornar 404)
+GET {{baseUrl}}/api/usuarios/9999
+
+### 21. CREATE - Crear usuario tipo PERSONA (persona natural)
+POST {{baseUrl}}/api/usuarios
+Content-Type: application/json
+
+{
+    "tipo_persona": "PERSONA",
+    "usuario": "jperez",
+    "clave": "password123",
+    "tipo_usuario": "CLIENTE",
+    "nombre": "Juan Pérez",
+    "tipo_documento": "CC",
+    "numero_documento": "1234567890",
+    "edad": 35,
+    "ciudad": "Bogotá",
+    "direccion": "Calle 123 #45-67",
+    "telefono_movil": "3001234567",
+    "correo": "jperez@email.com"
+}
+
+### 22. CREATE - Crear usuario tipo EMPRESA
+POST {{baseUrl}}/api/usuarios
+Content-Type: application/json
+
+{
+    "tipo_persona": "EMPRESA",
+    "usuario": "empresaabc",
+    "clave": "empresa123",
+    "tipo_usuario": "CLIENTE",
+    "razon_social": "Empresa ABC S.A.S",
+    "nit": "900123456-1",
+    "nombre_rep_legal": "María García",
+    "documento_rep_legal": "9876543210",
+    "telefono_rep_legal": "3109876543",
+    "correo_rep_legal": "mgarcia@empresaabc.com",
+    "contacto_alternativo": "contacto@empresaabc.com",
+    "ciudad": "Medellín",
+    "direccion": "Carrera 50 #10-20",
+    "telefono_movil": "3209876543",
+    "correo": "info@empresaabc.com"
+}
+
+### 23. CREATE - Crear usuario AGENTE
+POST {{baseUrl}}/api/usuarios
+Content-Type: application/json
+
+{
+    "tipo_persona": "PERSONA",
+    "usuario": "agente01",
+    "clave": "agente123",
+    "tipo_usuario": "AGENTE",
+    "nombre": "Carlos Rodríguez",
+    "tipo_documento": "CC",
+    "numero_documento": "5555555555",
+    "ciudad": "Cali",
+    "telefono_movil": "3155555555",
+    "correo": "crodriguez@alfabroker.com"
+}
+
+### 24. CREATE - Crear usuario ADMINISTRADOR
+POST {{baseUrl}}/api/usuarios
+Content-Type: application/json
+
+{
+    "tipo_persona": "PERSONA",
+    "usuario": "admin01",
+    "clave": "admin123",
+    "tipo_usuario": "ADMINISTRADOR",
+    "nombre": "Ana Administradora",
+    "ciudad": "Bogotá",
+    "correo": "admin@alfabroker.com"
+}
+
+### 25. CREATE - Error: campos requeridos faltantes (debería retornar 400)
+POST {{baseUrl}}/api/usuarios
+Content-Type: application/json
+
+{
+    "nombre": "Sin campos requeridos"
+}
+
+### 26. CREATE - Error: tipo_persona inválido (debería retornar 400)
+POST {{baseUrl}}/api/usuarios
+Content-Type: application/json
+
+{
+    "tipo_persona": "INVALIDO",
+    "usuario": "test",
+    "clave": "test123",
+    "tipo_usuario": "CLIENTE"
+}
+
+### 27. UPDATE - Actualizar datos de usuario
+PUT {{baseUrl}}/api/usuarios/1
+Content-Type: application/json
+
+{
+    "ciudad": "Barranquilla",
+    "telefono_movil": "3001111111",
+    "direccion": "Nueva dirección #123"
+}
+
+### 28. UPDATE - Actualizar tipo de usuario
+PUT {{baseUrl}}/api/usuarios/1
+Content-Type: application/json
+
+{
+    "tipo_usuario": "AGENTE"
+}
+
+### 29. UPDATE - Error: ID no existe (debería retornar 404)
+PUT {{baseUrl}}/api/usuarios/9999
+Content-Type: application/json
+
+{
+    "nombre": "No existe"
+}
+
+### 30. DELETE - Eliminar usuario (¡CUIDADO! Cambiar ID)
+DELETE {{baseUrl}}/api/usuarios/5
+
+### 31. DELETE - Error: ID no existe (debería retornar 404)
+DELETE {{baseUrl}}/api/usuarios/9999
+
+
+### ============================================================================
+### WORKFLOW DE PRUEBA USUARIOS
+### ============================================================================
+### Ejecutar en orden para probar el flujo completo:
+###
+### Paso 1: Ver usuarios existentes
+###         → Ejecutar #17
+###
+### Paso 2: Crear usuario persona natural
+###         → Ejecutar #21 (guardar el ID retornado)
+###
+### Paso 3: Crear usuario empresa
+###         → Ejecutar #22
+###
+### Paso 4: Filtrar por tipo
+###         → Ejecutar #18 (tipo_usuario=CLIENTE)
+###
+### Paso 5: Actualizar usuario
+###         → Ejecutar #27 con el ID del paso 2
+###
+### Paso 6: Verificar actualización
+###         → Ejecutar #19 con el ID actualizado
+###
+### Paso 7: Eliminar usuario de prueba
+###         → Ejecutar #30 con el ID del paso 2
+### ============================================================================
+
+
+### ============================================================================
+### ESTRUCTURA DE CAMPOS COPROPIEDAD (REFERENCIA)
+### ============================================================================
+### Formato de deducibles: "porcentaje,tipo,minimo"
+### Ejemplos:
+###   - "3,porcentaje,50000000" → 3% con mínimo de 50M
+###   - "10,porcentaje,5000000" → 10% con mínimo de 5M
+###   - "0,porcentaje,500000" → 0% (fijo) con mínimo de 500K
+###
+### Formato de sublímites: "porcentaje,tipo_evento,valor"
+### Ejemplos:
+###   - "30,porcentaje_evento,null" → 30% del evento
+###   - "25,porcentaje_evento,null" → 25% del evento
+###
+### Campos de asistencia: lista separada por comas
+### Ejemplos:
+###   - "vidrieria,plomeria,cerrajeria,electricista"
+###   - "vidrieria,plomeria"
+### ============================================================================
+
+
+### ============================================================================
+### ESTRUCTURA DE CAMPOS USUARIOS (REFERENCIA)
+### ============================================================================
+### tipo_persona: 'PERSONA' | 'EMPRESA'
+### tipo_usuario: 'CLIENTE' | 'AGENTE' | 'ADMINISTRADOR' | 'SUPERADMIN'
+###
+### Campos PERSONA (persona natural):
+###   - nombre (requerido)
+###   - tipo_documento (CC, CE, TI, etc.)
+###   - numero_documento
+###   - edad
+###
+### Campos EMPRESA:
+###   - razon_social (requerido)
+###   - nit
+###   - nombre_rep_legal
+###   - documento_rep_legal
+###   - telefono_rep_legal
+###   - correo_rep_legal
+###   - contacto_alternativo
+###
+### Campos comunes:
+###   - ciudad, direccion, telefono_movil, correo
+###   - usuario (único), clave
+### ============================================================================
+
+
+### ============================================================================
+### PROPUESTAS (Proposal Generation) - EXCEL TEMPLATE PROCESSING
+### ============================================================================
+
+### 32. GET TEMPLATES - Obtener plantillas disponibles
+GET {{baseUrl}}/api/propuestas/templates
+
+### 33. PREVIEW - Vista previa de generación (validación sin generar archivo)
+POST {{baseUrl}}/api/propuestas/preview
+Content-Type: application/json
+
+{
+    "template_name": "copropiedades",
+    "variables": {
+        "[2]": "2026-2027",
+        "[3]": "Juan Pérez García",
+        "[4]": "1234567890"
+    }
+}
+
+### 34. GENERATE - Generar propuesta de copropiedad (descarga archivo Excel)
+### NOTA: Este endpoint retorna un archivo .xlsx, no JSON
+POST {{baseUrl}}/api/propuestas/generate
+Content-Type: application/json
+
+{
+    "template_name": "copropiedades",
+    "variables": {
+        "[2]": "2026-2027",
+        "[3]": "Juan Pérez García",
+        "[4]": "1234567890",
+        "[5]": "",
+        "[6]": "Residencial",
+        "[7]": "Bogotá",
+        "[8]": "Calle 123 56-32 sur",
+        "[9]": "",
+        "[10]": "2001",
+        "[11]": "2",
+        "[12]": "4",
+        "[13]": "33",
+        "[14]": "2",
+        "[15]": "14",
+        "[16]": "66",
+        "[17]": "2",
+        "[18]": "2",
+        "[19]": "2",
+        "[20]": "100.000.000",
+        "[21]": "230.000.000",
+        "[22]": "12.000.000",
+        "[23]": "51.000.000",
+        "[24]": "50.000.000",
+        "[25]": "100.000.000",
+        "[26]": "230.000.000",
+        "[27]": "12.000.000"
+    }
+}
+
+### 35. GENERATE - Error: plantilla no existe (debería retornar 404)
+POST {{baseUrl}}/api/propuestas/generate
+Content-Type: application/json
+
+{
+    "template_name": "plantilla_inexistente",
+    "variables": {
+        "[1]": "test"
+    }
+}
+
+### 36. GENERATE - Error: sin variables (debería retornar 400)
+POST {{baseUrl}}/api/propuestas/generate
+Content-Type: application/json
+
+{
+    "template_name": "copropiedades"
+}
+
+### 37. GENERATE - Error: variables con formato incorrecto (debería retornar 400)
+POST {{baseUrl}}/api/propuestas/generate
+Content-Type: application/json
+
+{
+    "template_name": "copropiedades",
+    "variables": {
+        "variable_sin_corchetes": "valor"
+    }
+}
+
+
+### ============================================================================
+### WORKFLOW DE PRUEBA PROPUESTAS
+### ============================================================================
+### Ejecutar en orden para probar el flujo completo:
+###
+### Paso 1: Ver plantillas disponibles
+###         → Ejecutar #32 (debería mostrar ["copropiedades"])
+###
+### Paso 2: Validar datos sin generar archivo
+###         → Ejecutar #33 (preview muestra resumen de validación)
+###
+### Paso 3: Generar propuesta con todas las variables
+###         → Ejecutar #34 (descarga archivo Excel)
+###
+### Paso 4: Probar errores de validación
+###         → Ejecutar #35, #36, #37
+### ============================================================================

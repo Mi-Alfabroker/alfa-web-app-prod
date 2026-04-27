@@ -1,0 +1,342 @@
+================================================================================
+        FORMULARIO MAESTRO - PROPUESTA PÓLIZA COPROPIEDAD
+================================================================================
+Este documento define todos los campos necesarios para generar una propuesta
+de póliza de copropiedad. Cada campo indica su fuente de datos.
+
+LEYENDA DE FUENTES:
+  [BD:copropiedades]      → Automático desde tabla copropiedades
+  [BD:polizas_copropiedad]→ Automático desde tabla polizas_copropiedad  
+  [BD:aseguradoras]       → Automático desde tabla aseguradoras (por cada aseg. 1-5)
+  [MANUAL]                → Campo de llenado manual en el formulario
+  [CALCULADO]             → Se calcula automáticamente con fórmula
+
+================================================================================
+SECCIÓN 1: ENCABEZADO DEL DOCUMENTO
+================================================================================
+
+[fecha_expedicion]        [CALCULADO]   → Fecha actual al generar documento
+[año_vigencia]            [CALCULADO]   → Año actual - Año siguiente (ej: 2025-2026)
+
+================================================================================
+SECCIÓN 2: DATOS DEL CLIENTE / COPROPIEDAD
+================================================================================
+
+--- Identificación (del Usuario/Cliente asociado) ---
+[nombre_cliente]          [BD:usuarios]  → Nombre de la copropiedad/cliente
+[nit]                     [BD:usuarios]  → NIT de la persona jurídica
+[administrador]           [MANUAL]       → Nombre del administrador actual
+
+--- Ubicación del Bien ---
+[tipo_copropiedad]        [BD:copropiedades] → Residencial, Comercial, Mixto
+[ciudad]                  [BD:copropiedades] → Ciudad del bien
+[direccion]               [BD:copropiedades] → Dirección del bien
+
+--- Asesor Comercial ---
+[asesor]                  [MANUAL]       → Nombre completo del asesor
+
+================================================================================
+SECCIÓN 3: DETALLES DE LA COPROPIEDAD
+================================================================================
+
+--- Estructura del Edificio ---
+[ano_construccion]              [BD:copropiedades] → Año de construcción
+[estrato]                       [BD:copropiedades] → Estrato socioeconómico
+[numero_torres]                 [BD:copropiedades] → Número de torres
+[numero_maximo_pisos]           [BD:copropiedades] → Número máximo de pisos
+[numero_maximo_sotanos]         [BD:copropiedades] → Número máximo de sótanos
+
+--- Cantidad de Unidades ---
+[cantidad_unidades_casa]        [BD:copropiedades] → Casas
+[cantidad_unidades_apartamentos][BD:copropiedades] → Apartamentos
+[cantidad_unidades_locales]     [BD:copropiedades] → Locales comerciales
+[cantidad_unidades_oficinas]    [BD:copropiedades] → Oficinas
+[cantidad_unidades_otros]       [BD:copropiedades] → Otros
+
+================================================================================
+SECCIÓN 4: VALORES DEL BIEN (AVALÚO)
+================================================================================
+Estos son los valores reales del bien según avalúo.
+
+[valor_edificio_area_comun_avaluo]          [BD:copropiedades]
+[valor_edificio_area_privada_avaluo]        [BD:copropiedades]
+[valor_maquinaria_equipo_avaluo]            [BD:copropiedades]
+[valor_equipo_electrico_electronico_avaluo] [BD:copropiedades]
+[valor_muebles_avaluo]                      [BD:copropiedades]
+
+================================================================================
+SECCIÓN 5: VALORES ASEGURADOS
+================================================================================
+Valores que el cliente desea asegurar (no pueden superar el avalúo).
+
+[valor_area_comun_asegurado]                  [BD:polizas_copropiedad]
+[valor_area_privada_asegurado]                [BD:polizas_copropiedad]
+[valor_maquinaria_equipo_asegurado]           [BD:polizas_copropiedad]
+[valor_equipo_electronico_asegurado]          [BD:polizas_copropiedad]
+[valor_muebles_asegurado]                     [BD:polizas_copropiedad]
+[valor_directores_asegurado]                  [BD:polizas_copropiedad]
+[valor_rce_asegurado]                         [BD:polizas_copropiedad]
+[valor_manejo_asegurado]                      [BD:polizas_copropiedad]
+[valor_transporte_valores_vigencia_asegurado] [BD:polizas_copropiedad]
+[valor_transporte_valores_despacho_asegurado] [BD:polizas_copropiedad]
+
+================================================================================
+SECCIÓN 6: INFRASEGURO
+================================================================================
+Fórmula: INFRASEG = 1 - (valor_asegurado / valor_avaluo)
+Solo aplica donde existe avalúo correspondiente.
+
+[infraseg_area_comun]       [CALCULADO] → 1 - (asegurado / avaluo)
+[infraseg_area_privada]     [CALCULADO] → 1 - (asegurado / avaluo)
+[infraseg_maquinaria]       [CALCULADO] → 1 - (asegurado / avaluo)
+[infraseg_equipo_electrico] [CALCULADO] → 1 - (asegurado / avaluo)
+[infraseg_muebles]          [CALCULADO] → 1 - (asegurado / avaluo)
+
+================================================================================
+SECCIÓN 7: ASEGURADORAS SELECCIONADAS (hasta 5)
+================================================================================
+Para cada aseguradora X (donde X = 1, 2, 3, 4 o 5):
+
+--- Datos Base de la Aseguradora ---
+[nom_aseg_X]              [BD:aseguradoras] → nombre
+[pais_origen_X]           [BD:aseguradoras] → ruta_pais_logo
+[respaldo_X]              [BD:aseguradoras] → respaldo_aseguradora
+[numeral_asistencia_X]    [BD:aseguradoras] → numeral_asistencia
+
+--- Prima y Valor Total ---
+[valor_prima_aseg_X]      [BD:polizas_copropiedad] → valor_prima_aseg_X
+[valor_total_anual_X]     [CALCULADO]              → Prima + IVA + otros costos
+
+================================================================================
+SECCIÓN 8: COBERTURAS POR ASEGURADORA (X = 1-5)
+================================================================================
+Los campos de BD están almacenados como: "porcentaje,tipo,minimo"
+Se separan en 3 campos para el Excel:
+  [por_XXX_X]    → Porcentaje (ej: 3%)
+  [tipo_XXX_X]   → Tipo (ej: valor_perdida, valor_asegurado)
+  [minimo_XXX_X] → Mínimo en SMMLV (ej: 3)
+
+--------------------------------------------------------------------------------
+8.1 COBERTURA: DAÑOS MATERIALES (DM)
+--------------------------------------------------------------------------------
+Campo BD: cop_dm_deducible_terremoto → "porcentaje,tipo,minimo"
+[por_dm_terremoto_X]      [BD:aseguradoras] → separar posición 0
+[tipo_dm_terremoto_X]     [BD:aseguradoras] → separar posición 1
+[minimo_dm_terremoto_X]   [BD:aseguradoras] → separar posición 2
+
+Campo BD: cop_dm_deducible_inundacion → "porcentaje,tipo,minimo"
+[por_dm_inundacion_X]
+[tipo_dm_inundacion_X]
+[minimo_dm_inundacion_X]
+
+Campo BD: cop_dm_deducible_incendio → "porcentaje,tipo,minimo"
+[por_dm_incendio_X]
+[tipo_dm_incendio_X]
+[minimo_dm_incendio_X]
+
+Campo BD: cop_dm_deducible_amit → "porcentaje,tipo,minimo"
+[por_dm_amit_X]
+[tipo_dm_amit_X]
+[minimo_dm_amit_X]
+
+Campo BD: cop_dm_deducible_tuberia_vidrio → "porcentaje,tipo,minimo"
+[por_dm_tuberia_vidrio_X]
+[tipo_dm_tuberia_vidrio_X]
+[minimo_dm_tuberia_vidrio_X]
+
+--------------------------------------------------------------------------------
+8.2 COBERTURA: DAÑOS INTERNOS (DI)
+--------------------------------------------------------------------------------
+Campo BD: cop_di_deducible_maq_equipo
+[por_di_maq_equipo_X]
+[tipo_di_maq_equipo_X]
+[minimo_di_maq_equipo_X]
+
+Campo BD: cop_di_deducible_equipo_electronico
+[por_di_equipo_electronico_X]
+[tipo_di_equipo_electronico_X]
+[minimo_di_equipo_electronico_X]
+
+--------------------------------------------------------------------------------
+8.3 COBERTURA: SUSTRACCIÓN CON VIOLENCIA (SCV)
+--------------------------------------------------------------------------------
+Campo BD: cop_scv_deducible_maq_equipo
+[por_scv_maq_equipo_X]
+[tipo_scv_maq_equipo_X]
+[minimo_scv_maq_equipo_X]
+
+Campo BD: cop_scv_deducible_equipo_electronico
+[por_scv_equipo_electronico_X]
+[tipo_scv_equipo_electronico_X]
+[minimo_scv_equipo_electronico_X]
+
+Campo BD: cop_scv_deducible_dineros
+[por_scv_dineros_X]
+[tipo_scv_dineros_X]
+[minimo_scv_dineros_X]
+
+Campo BD: cop_scv_deducible_muebles
+[por_scv_muebles_X]
+[tipo_scv_muebles_X]
+[minimo_scv_muebles_X]
+
+--------------------------------------------------------------------------------
+8.4 COBERTURA: DIRECTORES & ADMINISTRADORES (DA)
+--------------------------------------------------------------------------------
+Campo BD: cop_da_deducible_amparo_basico
+[por_da_amparo_basico_X]
+[tipo_da_amparo_basico_X]
+[minimo_da_amparo_basico_X]
+
+--------------------------------------------------------------------------------
+8.5 COBERTURA: RCE - DEDUCIBLES
+--------------------------------------------------------------------------------
+Campo BD: cop_rce_deducible_contratistas
+[por_rce_ded_contratistas_X]
+[tipo_rce_ded_contratistas_X]
+[minimo_rce_ded_contratistas_X]
+
+Campo BD: cop_rce_deducible_cruzada
+[por_rce_ded_cruzada_X]
+[tipo_rce_ded_cruzada_X]
+[minimo_rce_ded_cruzada_X]
+
+Campo BD: cop_rce_deducible_patronal
+[por_rce_ded_patronal_X]
+[tipo_rce_ded_patronal_X]
+[minimo_rce_ded_patronal_X]
+
+Campo BD: cop_rce_deducible_parqueaderos
+[por_rce_ded_parqueaderos_X]
+[tipo_rce_ded_parqueaderos_X]
+[minimo_rce_ded_parqueaderos_X]
+
+Campo BD: cop_rce_deducible_gastos_medicos
+[por_rce_ded_gastos_medicos_X]
+[tipo_rce_ded_gastos_medicos_X]
+[minimo_rce_ded_gastos_medicos_X]
+
+--------------------------------------------------------------------------------
+8.6 COBERTURA: RCE - SUBLÍMITES
+--------------------------------------------------------------------------------
+Campo BD: cop_rce_sublimite_contratistas
+[por_rce_sub_contratistas_X]
+[tipo_rce_sub_contratistas_X]
+[minimo_rce_sub_contratistas_X]
+
+Campo BD: cop_rce_sublimite_cruzada
+[por_rce_sub_cruzada_X]
+[tipo_rce_sub_cruzada_X]
+[minimo_rce_sub_cruzada_X]
+
+Campo BD: cop_rce_sublimite_patronal
+[por_rce_sub_patronal_X]
+[tipo_rce_sub_patronal_X]
+[minimo_rce_sub_patronal_X]
+
+Campo BD: cop_rce_sublimite_parqueaderos
+[por_rce_sub_parqueaderos_X]
+[tipo_rce_sub_parqueaderos_X]
+[minimo_rce_sub_parqueaderos_X]
+
+Campo BD: cop_rce_sublimite_gastos_medicos
+[por_rce_sub_gastos_medicos_X]
+[tipo_rce_sub_gastos_medicos_X]
+[minimo_rce_sub_gastos_medicos_X]
+
+--------------------------------------------------------------------------------
+8.7 COBERTURA: MANEJO
+--------------------------------------------------------------------------------
+Campo BD: cop_manejo_deducible_amparo_basico
+[por_manejo_amparo_basico_X]
+[tipo_manejo_amparo_basico_X]
+[minimo_manejo_amparo_basico_X]
+
+--------------------------------------------------------------------------------
+8.8 COBERTURA: TRANSPORTE DE VALORES (TV)
+--------------------------------------------------------------------------------
+Campo BD: cop_tv_deducible_amparo_basico
+[por_tv_amparo_basico_X]
+[tipo_tv_amparo_basico_X]
+[minimo_tv_amparo_basico_X]
+
+================================================================================
+SECCIÓN 9: ASISTENCIAS POR ASEGURADORA (X = 1-5)
+================================================================================
+Los campos de BD están almacenados como: "vidrieria,plomeria,cerrajeria,electricista"
+Se separan en campos individuales.
+
+Campo BD: cop_asistencia_area_comun → "vidrieria,plomeria,cerrajeria,electricista"
+[asist_comun_vidrieria_X]     [BD:aseguradoras] → separar posición 0
+[asist_comun_plomeria_X]      [BD:aseguradoras] → separar posición 1
+[asist_comun_cerrajeria_X]    [BD:aseguradoras] → separar posición 2
+[asist_comun_electricista_X]  [BD:aseguradoras] → separar posición 3
+[asist_comun_total_X]         [CALCULADO]       → Suma de todos
+
+Campo BD: cop_asistencia_area_privada → "vidrieria,plomeria,cerrajeria,electricista"
+[asist_privada_vidrieria_X]
+[asist_privada_plomeria_X]
+[asist_privada_cerrajeria_X]
+[asist_privada_electricista_X]
+[asist_privada_total_X]       [CALCULADO]       → Suma de todos
+
+================================================================================
+SECCIÓN 10: COBERTURAS DIFERENCIADORAS (X = 1-5)
+================================================================================
+Estos campos indican SI/NO aplica cierta cobertura especial.
+
+[no_demerito_uso_X]               [MANUAL] → SI/NO - No aplica demérito por uso
+[cobertura_accidentes_consejo_X]  [MANUAL] → SI/NO - Accidentes personales consejo
+
+================================================================================
+SECCIÓN 11: ROTURA DE VIDRIOS (X = 1-5)
+================================================================================
+[rotura_vidrios_eventos_X]        [MANUAL] → Número de eventos cubiertos
+
+================================================================================
+                         RESUMEN DE FUENTES DE DATOS
+================================================================================
+
+TABLAS INVOLUCRADAS:
+├── usuarios              → nombre_cliente, nit
+├── copropiedades         → Datos del bien y valores de avalúo
+├── polizas_copropiedad   → Valores asegurados y primas por aseguradora
+└── aseguradoras          → Coberturas, deducibles, asistencias (x5)
+
+CAMPOS MANUALES (formulario):
+├── administrador         → Nombre del administrador actual
+├── asesor                → Nombre del asesor comercial
+├── no_demerito_uso_X     → Cobertura diferenciadora
+├── cobertura_accidentes_consejo_X → Cobertura diferenciadora
+└── rotura_vidrios_eventos_X → Eventos de rotura de vidrios
+
+CAMPOS CALCULADOS:
+├── fecha_expedicion      → Fecha actual
+├── año_vigencia          → Año actual - Año siguiente
+├── infraseg_*            → 1 - (asegurado / avaluo)
+├── valor_total_anual_X   → Prima + IVA + otros
+└── asist_*_total_X       → Suma de asistencias
+
+================================================================================
+                    LÓGICA DE SEPARACIÓN DE CAMPOS
+================================================================================
+
+Para campos de deducibles almacenados como "porcentaje,tipo,minimo":
+
+    valor_bd = "3,valor_perdida,3"
+    partes = valor_bd.split(",")
+    
+    por_XXX_X    = partes[0]  # "3"
+    tipo_XXX_X   = partes[1]  # "valor_perdida"
+    minimo_XXX_X = partes[2]  # "3"
+
+Para campos de asistencias almacenados como "v,p,c,e":
+
+    valor_bd = "5,3,4,2"
+    partes = valor_bd.split(",")
+    
+    vidrieria    = partes[0]  # "5"
+    plomeria     = partes[1]  # "3"
+    cerrajeria   = partes[2]  # "4"
+    electricista = partes[3]  # "2"
+    total        = sum(partes) # 14

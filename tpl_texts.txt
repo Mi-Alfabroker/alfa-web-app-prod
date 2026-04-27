@@ -1,0 +1,240 @@
+﻿V
+10
+601 521
+ 33 44
+302 606 02 18
+copropiedades@alfabrokerseguros.com
+www.alfabrokerseguros.com
+ASESOR: 
+[9]
+COBERTURA RESPONSABILIDAD CIVIL EXTRACONTRACTUAL
+[100]
+Sublimites
+RCE CONTRATISTAS
+$ [31] Millones
+Valor Asegurado
+[103]
+RCE CRUZADA
+[106]
+RCE PATRONAL
+[109]
+RCE PARQUEADERO
+[112]
+GASTOS MÉDICOS
+[85]
+Deducibles (Vlr
+ Perd.
+)
+RCE CONTRATISTAS
+[87]
+[88]
+RCE CRUZADA
+[90]
+[91]
+RCE PATRONAL
+[93]
+[94]
+RCE PARQUEADEROS
+[96]
+[97]
+GASTOS MÉDICOS
+[99]
+[115]
+Deducible Amparo Básico
+[116]
+COBERTURA MANEJO
+$ [32] Millones
+Valor Asegurado
+[118]
+Deducible Amparo Básico
+[119]
+COBERTURA TRANSPORTE VALORES
+$ [33] M
+Valor Asegurado
+/año
+$ [34] M
+/despacho
+COBERTURA RESPONSABILIDAD CIVIL EXTRACONTRACTUAL
+[191]
+Sublimites
+RCE CONTRATISTAS
+$ [31]  Millones
+Valor Asegurado
+[194]
+RCE CRUZADA
+[197]
+RCE PATRONAL
+[200]
+RCE PARQUEADERO
+[203]
+GASTOS MÉDICOS
+[176]
+Deducibles (Vlr Perd.)
+RCE CONTRATISTAS
+[178]
+[179]
+RCE CRUZADA
+[181]
+[182]
+RCE PATRONAL
+[184]
+[185]
+RCE PARQUEADEROS
+[187]
+[188]
+GASTOS MÉDICOS
+[190]
+[206]
+Deducible Amparo Básico
+[207]
+COBERTURA MANEJO
+$ [32] Millones
+Valor Asegurado
+[209]
+Deducible Amparo Básico
+[210]
+COBERTURA TRANSPORTE VALORES
+$ [33] M
+Valor Asegurado
+/año
+$ [34] M
+/despacho
+COBERTURA RESPONSABILIDAD CIVIL EXTRACONTRACTUAL
+[282]
+Sublimites
+RCE CONTRATISTAS
+$ [31]  Millones
+Valor Asegurado
+[285]
+RCE CRUZADA
+[288]
+RCE PATRONAL
+[291]
+RCE PARQUEADERO
+[294]
+GASTOS MÉDICOS
+[267]
+Deducibles (Vlr
+ Perd.
+)
+RCE CONTRATISTAS
+[269]
+[270]
+RCE CRUZADA
+[272]
+[273]
+RCE PATRONAL
+[275]
+[276]
+RCE PARQUEADEROS
+[278]
+[279]
+GASTOS MÉDICOS
+[281]
+[297]
+Deducible Amparo Básico
+[298]
+COBERTURA MANEJO
+$
+ 
+[32] Millones
+Valor Asegurado
+[300]
+Deducible Amparo Básico
+[301]
+COBERTURA TRANSPORTE VALORES
+$ [33] M
+Valor Asegurado
+/año
+$ [34] M
+/despacho
+COBERTURA RESPONSABILIDAD CIVIL EXTRACONTRACTUAL
+[373]
+Sublimites
+RCE CONTRATISTAS
+$ [31]  Millones
+Valor Asegurado
+[376]
+RCE CRUZADA
+[379]
+RCE PATRONAL
+[382]
+RCE PARQUEADERO
+[385]
+GASTOS MÉDICOS
+[358]
+Deducibles (Vlr Perd.)
+RCE CONTRATISTAS
+[360]
+[361]
+RCE CRUZADA
+[363]
+[364]
+RCE PATRONAL
+[366]
+[367]
+RCE PARQUEADEROS
+[369]
+[370]
+GASTOS MÉDICOS
+[372]
+[388]
+Deducible Amparo Básico
+[389]
+COBERTURA MANEJO
+$ [32] Millones
+Valor Asegurado
+[391]
+Deducible Amparo Básico
+[392]
+COBERTURA TRANSPORTE VALORES
+$ [33] M
+Valor Asegurado
+/año
+$ [34] M
+/despacho
+COBERTURA RESPONSABILIDAD CIVIL EXTRACONTRACTUAL
+[464]
+Sublimites
+RCE CONTRATISTAS
+$ [31]  Millones
+Valor Asegurado
+[467]
+RCE CRUZADA
+[470]
+RCE PATRONAL
+[473]
+RCE PARQUEADERO
+[476]
+GASTOS MÉDICOS
+[449]
+Deducibles (Vlr Perd.)
+RCE CONTRATISTAS
+[451]
+[452]
+RCE CRUZADA
+[454]
+[455]
+RCE PATRONAL
+[457]
+[458]
+RCE PARQUEADEROS
+[460]
+[461]
+GASTOS MÉDICOS
+[463]
+[479]
+Deducible Amparo Básico
+VALOR DE LA PERDIDA
+COBERTURA MANEJO
+$ [32] Millones
+Valor Asegurado
+[482]
+Deducible Amparo Básico
+[483]
+COBERTURA TRANSPORTE VALORES
+$ [33] M
+Valor Asegurado
+/año
+$ [34] M
+/despacho

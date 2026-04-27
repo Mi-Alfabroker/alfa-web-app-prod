@@ -1,0 +1,2 @@
+# No se requieren dependencias externas
+# El script usa solo bibliotecas estándar de Python 3.11

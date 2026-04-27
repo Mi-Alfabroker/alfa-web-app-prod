@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  xlsx-to-pdf:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: xlsx-pdf-converter
+    volumes:
+      # Montar directorio local 'input' al directorio /input del contenedor
+      - ./input:/input
+      # Montar directorio local 'output' al directorio /output del contenedor
+      - ./output:/output
+      # Directorio temporal para archivos xlsx
+      - ./tmp-xlsx:/tmp-xlsx
+    environment:
+      - PYTHONUNBUFFERED=1
+    # Comando por defecto (puedes sobrescribirlo al ejecutar)
+    # command: ["--help"]
+    # Para ejecutar con argumentos personalizados, usa:
+    # docker-compose run --rm xlsx-to-pdf [tus argumentos]

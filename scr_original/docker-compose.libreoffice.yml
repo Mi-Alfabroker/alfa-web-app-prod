@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  python-libreoffice:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: python_libreoffice_app
+    volumes:
+      - ./generador_propuestas:/app/generador_propuestas
+    environment:
+      - PYTHONUNBUFFERED=1
+    stdin_open: true
+    tty: true

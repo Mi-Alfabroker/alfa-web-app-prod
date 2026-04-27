@@ -1,0 +1,29 @@
+{
+  "texto": {
+    "[nombre_administrador]": "Ana Pérez",
+    "[año_año_siguiente]": "2025-2026",
+    "[fecha_expedicion]": "Diciembre 6, 2025",
+    "[ciudad]": "Fusagasuga",
+    "[direccion]": "Calle 123 # 45-67",
+    "[nombre_copropiedad]": "Conjunto de don Manuel",
+    "[nit]": "1234567890",
+    "[vlr_bien_comun]": "$11.000.000.000",
+    "[presentado_a]": "Conjunto de don Manuel",
+    "[nombre_asesor]": "Felipe Diaz",
+    "[numero_asesor]": "1234567890",
+    "[aseg_opt_1]": "Aseguradora 1",
+    "[aseg_opt_2]": "Aseguradora 2",
+    "[aseg_opt_3]": "Aseguradora 3",
+    "[aseg_opt_4]": "Aseguradora 4",
+    "[aseg_opt_5]": "Aseguradora 5",
+    "[aseg_opt_6]": "Aseguradora 6",
+    "[aseg_opt_7]": "Aseguradora 7"
+  },
+  "imagenes": {
+    "logo_aseguradora": "imagenes/logo_aseguradora1.png",
+    "firma_asesor": "imagenes/firma_felipe.jpg",
+    "sello_empresa": "imagenes/sello_striker.png"
+  }
+}
+
+

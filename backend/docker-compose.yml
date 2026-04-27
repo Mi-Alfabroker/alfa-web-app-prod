@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: alfabroker-api
+    ports:
+      - "5000:5000"
+    env_file:
+      - .env
+    volumes:
+      - ../gestion_documental_ab:/opt/gestion_documental_ab
+    networks:
+      - alfabroker_network
+    restart: unless-stopped
+
+networks:
+  alfabroker_network:
+    external: true

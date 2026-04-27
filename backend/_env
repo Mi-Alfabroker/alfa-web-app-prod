@@ -1,0 +1,19 @@
+# Database Configuration
+DB_HOST=alfabroker-db
+DB_PORT=5432
+DB_NAME=alfabroker
+DB_USER=admin
+DB_PASSWORD=admin
+
+# Flask Configuration
+FLASK_APP=run.py
+FLASK_ENV=development
+FLASK_DEBUG=1
+
+# Full Database URL (constructed from above)
+DATABASE_URL=postgresql://admin:admin@alfabroker-db:5432/alfabroker
+
+# Auth / Security Configuration
+JWT_SECRET_KEY=change-this-in-production
+JWT_ACCESS_TOKEN_EXPIRES_MINUTES=30
+JWT_REFRESH_TOKEN_EXPIRES_DAYS=7
