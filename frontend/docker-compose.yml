@@ -12,13 +12,12 @@ services:
     volumes:
       - .:/app
       - /app/node_modules
-    environment:
-      - NODE_ENV=development
-      - VITE_API_BASE_URL=http://alfabroker-backend:5000
     env_file:
       - .env
-    networks:
-      - alfabroker_network
+    environment:
+      - NODE_ENV=${NODE_ENV:-development}
+      - VITE_API_BASE_URL=${VITE_API_BASE_URL}
+      - VITE_API_TIMEOUT=${VITE_API_TIMEOUT}
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000"]
@@ -26,7 +25,3 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
-
-networks:
-  alfabroker_network:
-    external: true

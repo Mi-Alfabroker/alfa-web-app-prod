@@ -35,7 +35,8 @@ def create_app(config: dict = None):
              'http://localhost:3000', 
              'http://127.0.0.1:3000',
              'http://localhost:5173',  # Vite default port
-             'http://127.0.0.1:5173'
+             'http://127.0.0.1:5173',
+             'http://34.56.64.76:3000'
          ],
          methods=['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
          allow_headers=['Content-Type', 'Authorization'],

@@ -10,6 +10,8 @@ services:
       - "5000:5000"
     env_file:
       - .env
+    environment:
+      - PYTHONUNBUFFERED=1  # <--- AGREGA ESTO para ver logs en tiempo real
     volumes:
       - ../gestion_documental_ab:/opt/gestion_documental_ab
     networks:
