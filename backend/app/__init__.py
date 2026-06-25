@@ -29,15 +29,19 @@ def create_app(config: dict = None):
     app = Flask(__name__)
     
     # Configure CORS - allow requests from frontend
-    # In production, restrict origins to specific domains
-    CORS(app, 
-         origins=[
-             'http://localhost:3000', 
-             'http://127.0.0.1:3000',
-             'http://localhost:5173',  # Vite default port
-             'http://127.0.0.1:5173',
-             'http://34.56.64.76:3000'
-         ],
+    # Origenes desde env CORS_ORIGINS (separados por coma); si no, defaults dev.
+    cors_env = os.environ.get('CORS_ORIGINS')
+    if cors_env:
+        cors_origins = [o.strip() for o in cors_env.split(',') if o.strip()]
+    else:
+        cors_origins = [
+            'http://localhost:3000',
+            'http://127.0.0.1:3000',
+            'http://localhost:5173',  # Vite default port
+            'http://127.0.0.1:5173',
+        ]
+    CORS(app,
+         origins=cors_origins,
          methods=['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
          allow_headers=['Content-Type', 'Authorization'],
          supports_credentials=True,

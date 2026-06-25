@@ -38,6 +38,8 @@ services:
       - FLASK_ENV=production
       - FLASK_DEBUG=0
       - PYTHONUNBUFFERED=1
+      # Origenes permitidos por CORS (browser). Debe incluir la URL del frontend.
+      - CORS_ORIGINS=${CORS_ORIGINS:-http://localhost:3000}
       # Secretos de prod: definir en .env raiz del droplet (NO commitear)
       - JWT_SECRET_KEY=${JWT_SECRET_KEY:?define JWT_SECRET_KEY en .env}
       - JWT_ACCESS_TOKEN_EXPIRES_MINUTES=${JWT_ACCESS_TOKEN_EXPIRES_MINUTES:-30}
