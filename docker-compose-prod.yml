@@ -1,0 +1,85 @@
+# Production stack: DB + backend (Flask) + frontend (SvelteKit/adapter-node)
+# Build & run everything:
+#   docker compose -f docker-compose-prod.yml up -d --build
+# Tear down (keep DB data):
+#   docker compose -f docker-compose-prod.yml down
+# Tear down + wipe DB:
+#   docker compose -f docker-compose-prod.yml down -v
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: alfabroker-db
+    environment:
+      POSTGRES_USER: ${DB_USER:-admin}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-admin}
+      POSTGRES_DB: ${DB_NAME:-alfabroker}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./DB:/docker-entrypoint-initdb.d
+    networks:
+      - alfabroker_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-admin} -d ${DB_NAME:-alfabroker}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: alfabroker-api
+    # Carga backend/.env y luego sobreescribe lo critico de prod (environment gana sobre env_file)
+    env_file:
+      - ./backend/.env
+    environment:
+      - FLASK_ENV=production
+      - FLASK_DEBUG=0
+      - PYTHONUNBUFFERED=1
+      # Secretos de prod: definir en .env raiz del droplet (NO commitear)
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY:?define JWT_SECRET_KEY en .env}
+      - JWT_ACCESS_TOKEN_EXPIRES_MINUTES=${JWT_ACCESS_TOKEN_EXPIRES_MINUTES:-30}
+      - JWT_REFRESH_TOKEN_EXPIRES_DAYS=${JWT_REFRESH_TOKEN_EXPIRES_DAYS:-7}
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./gestion_documental_ab:/opt/gestion_documental_ab
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - alfabroker_network
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: production
+      # VITE_API_BASE_URL se hornea AQUI (build), no en runtime.
+      # En droplet PUBLIC_API_URL debe ser http://TU_IP:5000 o https://tu-dominio
+      args:
+        VITE_API_BASE_URL: ${PUBLIC_API_URL:-http://localhost:5000}
+        VITE_API_TIMEOUT: ${VITE_API_TIMEOUT:-30000}
+    container_name: alfabroker-frontend
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - HOST=0.0.0.0
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api
+    networks:
+      - alfabroker_network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+
+networks:
+  alfabroker_network:
+    name: alfabroker_network
+    driver: bridge
