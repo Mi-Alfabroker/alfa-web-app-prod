@@ -32,7 +32,8 @@ COPY --from=builder /app/build ./build
 COPY --from=builder /app/package*.json ./
 
 # Install only production dependencies
-RUN npm ci --only=production
+# npm install (no ci) tolera lock desfasado; --omit=dev = solo runtime
+RUN npm install --omit=dev
 
 # Expose port
 EXPOSE 3000
