@@ -585,9 +585,7 @@
 		<button 
 			type="button" 
 			class="p-2 hover:bg-secondary-100 rounded-lg transition-colors"
-			on:click={() => goto(`/propuestas/otro/${poliz
-
-aId}`)}
+			on:click={() => goto(`/propuestas/otro/${polizaId}`)}
 		>
 			<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
 				<path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
