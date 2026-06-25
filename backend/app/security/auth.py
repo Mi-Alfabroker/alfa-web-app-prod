@@ -2,6 +2,7 @@
 from datetime import datetime, timedelta, timezone
 from typing import Any, Optional
 
+import bcrypt
 import jwt
 from flask import current_app
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -32,6 +33,7 @@ def is_password_hashed(value: str) -> bool:
         or value.startswith("argon2:")
         or value.startswith("$2a$")
         or value.startswith("$2b$")
+        or value.startswith("$2y$")
     )
 
 
@@ -49,6 +51,14 @@ def verify_password(raw_password: str, stored_password: str) -> bool:
     # Backward-compatible path for legacy plaintext rows before migration.
     if not is_password_hashed(stored_password):
         return raw_password == stored_password
+
+    # Hashes bcrypt ($2a/$2b/$2y) vienen del seed de la DB (pgcrypto crypt()).
+    # werkzeug.check_password_hash NO entiende este formato crudo -> verificar con bcrypt.
+    if stored_password.startswith(("$2a$", "$2b$", "$2y$")):
+        try:
+            return bcrypt.checkpw(raw_password.encode("utf-8"), stored_password.encode("utf-8"))
+        except ValueError:
+            return False
 
     return check_password_hash(stored_password, raw_password)
 
