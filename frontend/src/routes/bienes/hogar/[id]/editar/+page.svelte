@@ -3,7 +3,7 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { APP_NAME } from '$lib/config';
-	import { FormSection, FormField, Input, Select, CurrencyInput } from '$components';
+	import { CurrencyInput, FormField, FormSection, Input, PageHeader, Select } from '$components';
 	import { bienService, clienteService } from '$services';
 	import { HogarFields } from '$constants';
 	import type { Cliente } from '$lib/types/cliente';
@@ -91,18 +91,14 @@
 	<title>Editar Hogar | {APP_NAME}</title>
 </svelte:head>
 
-<header class="page-header">
-	<div class="flex items-center gap-4">
-		<a href="/bienes" class="page-back-link">
-			<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-				<path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
-			</svg>
-			<span>Volver</span>
-		</a>
-	</div>
-</header>
+<div class="page-shell">
+	<PageHeader
+		title="Editar hogar #{id}"
+		crumb="Inicio / Operación / Bienes"
+		backHref="/bienes"
+		backLabel="Volver a bienes"
+	/>
 
-<div class="page-content">
 	<div class="max-w-4xl mx-auto">
 		{#if loading}
 			<div class="flex items-center justify-center py-12">
@@ -117,7 +113,6 @@
 			</div>
 		{:else}
 			<form class="form-container" on:submit|preventDefault={handleSubmit}>
-				<h1 class="form-title">Editar Hogar #{id}</h1>
 
 				{#if error}
 					<div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
@@ -133,7 +128,7 @@
 				</FormSection>
 
 				<FormSection title="Datos del Hogar" bind:open={sections.datos.open}>
-					<div class="space-y-4">
+					<div class="field-pairs">
 						<FormField label={HogarFields.tipo_inmueble.label}>
 							<Select 
 								bind:value={formData.tipo_inmueble}
@@ -144,7 +139,7 @@
 						<FormField label={HogarFields.ciudad_inmueble.label}>
 							<Input bind:value={formData.ciudad_inmueble} disabled={saving} />
 						</FormField>
-						<FormField label={HogarFields.direccion_inmueble.label}>
+						<FormField label={HogarFields.direccion_inmueble.label} wide>
 							<Input bind:value={formData.direccion_inmueble} disabled={saving} />
 						</FormField>
 						<FormField label={HogarFields.numero_pisos.label}>
@@ -157,7 +152,7 @@
 				</FormSection>
 
 				<FormSection title="Valores de Avalúo" bind:open={sections.valores.open}>
-					<div class="space-y-4">
+					<div class="field-pairs">
 						<FormField label={HogarFields.valor_inmueble_avaluo.label}>
 							<CurrencyInput bind:value={formData.valor_inmueble_avaluo} disabled={saving} />
 						</FormField>

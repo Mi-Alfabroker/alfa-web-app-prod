@@ -3,72 +3,92 @@
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
-	import { APP_NAME } from '$lib/config';
 	import { authService } from '$lib/services/auth.service';
 	import { auth, clearSession, getAccessToken, getAuthUser } from '$lib/stores/auth';
+	import { invalidateCatalog } from '$lib/stores/catalog';
 	import type { UserRole } from '$lib/types';
-	import { Notifications } from '$lib/components';
+	import { Notifications, TopBar } from '$lib/components';
+	import { initials, RUBROS } from '$utils';
+	import { DOMAIN_ICONS } from '$constants';
+	import type { DomainIcon } from '$constants';
+
+	const COLLAPSE_KEY = 'ab_sidebar_collapsed';
+	const NARROW_BREAKPOINT = 768;
 
 	// Sidebar state
 	let collapsed = false;
+	let drawerOpen = false;
+	let width = 1280;
+	let subOpen = false;
+	let userMenuOpen = false;
+	let tip: { label: string; top: string; left: string } | null = null;
 
-	type NavigationItem = {
+	/** `d` / `d2` are the two SVG paths of a DOMAIN_ICONS glyph. */
+	type NavigationItem = DomainIcon & {
 		href: string;
 		label: string;
-		icon: string;
 		roles: UserRole[];
+		/** Renders the Pólizas rubro submenu underneath. */
+		rubros?: boolean;
 	};
 
-	const navigation: NavigationItem[] = [
-		{ 
-			href: '/', 
-			label: 'Dashboard', 
-			icon: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6',
-			roles: ['AGENTE', 'ADMINISTRADOR', 'SUPERADMIN', 'CLIENTE']
+	type NavigationGroup = {
+		label?: string;
+		items: NavigationItem[];
+	};
+
+	const ALL: UserRole[] = ['AGENTE', 'ADMINISTRADOR', 'SUPERADMIN', 'CLIENTE'];
+	const STAFF: UserRole[] = ['AGENTE', 'ADMINISTRADOR', 'SUPERADMIN'];
+	const ADMIN: UserRole[] = ['ADMINISTRADOR', 'SUPERADMIN'];
+
+	// Glyphs come from DOMAIN_ICONS so a dashboard action tile and the nav item it
+	// leads to always show the same icon.
+	const navigationGroups: NavigationGroup[] = [
+		{
+			items: [
+				{ href: '/', label: 'Dashboard', ...DOMAIN_ICONS.dashboard, roles: ALL },
+				{ href: '/clientes', label: 'Clientes', ...DOMAIN_ICONS.clientes, roles: STAFF },
+				{ href: '/propuestas', label: 'Pólizas', ...DOMAIN_ICONS.polizas, roles: STAFF, rubros: true },
+				{ href: '/bienes', label: 'Bienes', ...DOMAIN_ICONS.bienes, roles: STAFF },
+				{ href: '/aseguradoras', label: 'Aseguradoras', ...DOMAIN_ICONS.aseguradoras, roles: STAFF }
+			]
 		},
-		{ 
-			href: '/aseguradoras', 
-			label: 'Aseguradoras', 
-			icon: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4',
-			roles: ['AGENTE', 'ADMINISTRADOR', 'SUPERADMIN']
-		},
-		{ 
-			href: '/clientes', 
-			label: 'Clientes', 
-			icon: 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z',
-			roles: ['AGENTE', 'ADMINISTRADOR', 'SUPERADMIN']
-		},
-		{ 
-			href: '/bienes', 
-			label: 'Bienes', 
-			icon: 'M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 00-10.026 0 1.106 1.106 0 00-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12',
-			roles: ['AGENTE', 'ADMINISTRADOR', 'SUPERADMIN']
-		},
-		{ 
-			href: '/propuestas', 
-			label: 'Pólizas', 
-			icon: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z',
-			roles: ['AGENTE', 'ADMINISTRADOR', 'SUPERADMIN']
-		},
-		{ 
-			href: '/reportes', 
-			label: 'Reportes', 
-			icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z',
-			roles: ['ADMINISTRADOR', 'SUPERADMIN']
+		{
+			label: 'Administración',
+			items: [{ href: '/reportes', label: 'Reportes', ...DOMAIN_ICONS.reportes, roles: ADMIN }]
 		}
 	];
 
+	/** Flat list, for the role guard and the fallback path. */
+	const navigation: NavigationItem[] = navigationGroups.flatMap((g) => g.items);
+
 	$: isLoginRoute = $page.url.pathname.startsWith('/login');
 	$: currentRole = $auth.user?.tipo_usuario;
-	$: allowedNavigation = currentRole ? navigation.filter((item) => item.roles.includes(currentRole)) : [];
+	$: narrow = width < NARROW_BREAKPOINT;
+	// On narrow viewports the sidebar is a full-width drawer, never collapsed.
+	$: expanded = narrow ? true : !collapsed;
+	$: allowedGroups = currentRole
+		? navigationGroups
+				.map((g) => ({ ...g, items: g.items.filter((i) => i.roles.includes(currentRole)) }))
+				.filter((g) => g.items.length > 0)
+		: [];
+	$: activeRubro = $page.url.searchParams.get('rubro');
 	$: if (!isLoginRoute && $auth.user && !canAccessPath($page.url.pathname, $auth.user.tipo_usuario)) {
 		const fallbackPath = getFallbackPath($auth.user.tipo_usuario);
 		if ($page.url.pathname !== fallbackPath) {
 			void goto(fallbackPath);
 		}
 	}
+	// Close transient shell UI whenever the route changes.
+	$: if ($page.url.pathname) {
+		drawerOpen = false;
+		userMenuOpen = false;
+		tip = null;
+	}
 
 	onMount(async () => {
+		collapsed = localStorage.getItem(COLLAPSE_KEY) === '1';
+
 		if (isLoginRoute) {
 			if (getAccessToken()) {
 				await goto('/');
@@ -115,103 +135,232 @@
 
 	function toggleSidebar() {
 		collapsed = !collapsed;
+		userMenuOpen = false;
+		tip = null;
+		localStorage.setItem(COLLAPSE_KEY, collapsed ? '1' : '0');
+	}
+
+	/** Expanding a submenu needs labels, so a collapsed rail expands first. */
+	function togglePolizas(event: MouseEvent) {
+		if (!narrow && collapsed) {
+			event.preventDefault();
+			collapsed = false;
+			localStorage.setItem(COLLAPSE_KEY, '0');
+			subOpen = true;
+			tip = null;
+			return;
+		}
+		subOpen = !subOpen;
+	}
+
+	function showTip(event: MouseEvent, label: string) {
+		if (narrow || !collapsed) return;
+		const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
+		tip = {
+			label,
+			top: rect.top + rect.height / 2 + 'px',
+			left: rect.right + 12 + 'px'
+		};
 	}
 
 	async function logout() {
 		clearSession();
+		invalidateCatalog();
 		await goto('/login');
 	}
+
+	$: userLabel = $auth.user
+		? $auth.user.nombre || $auth.user.razon_social || $auth.user.usuario
+		: '';
 </script>
+
+<svelte:window bind:innerWidth={width} />
 
 {#if isLoginRoute}
 	<slot />
 {:else}
-<div class="min-h-screen flex bg-secondary-100">
-	<!-- Sidebar -->
-	<aside 
-		class="sidebar {collapsed ? 'sidebar-collapsed' : 'sidebar-expanded'}"
-	>
-		<!-- Logo -->
-		<div class="sidebar-header">
-			<div class="sidebar-logo">
-				<svg class="w-6 h-6 text-primary-950" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-					<path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
-				</svg>
-			</div>
-			{#if !collapsed}
-				<span class="sidebar-logo-text">{APP_NAME}</span>
-			{/if}
-		</div>
+	<div class="flex min-h-screen items-stretch">
+		{#if narrow && drawerOpen}
+			<div
+				class="fixed inset-0 z-[35]"
+				style="background: color-mix(in srgb, #1d1f20 45%, transparent)"
+				role="presentation"
+				on:click={() => (drawerOpen = false)}
+			></div>
+		{/if}
 
-		<!-- Navigation -->
-		<nav class="sidebar-nav">
-			<ul class="space-y-1">
-				{#each allowedNavigation as item}
-					<li>
+		<aside
+			class="sidebar {expanded ? 'sidebar-expanded' : 'sidebar-collapsed'}"
+			class:fixed={narrow}
+			class:sticky={!narrow}
+			style="top: 0; height: 100vh; z-index: 40; {narrow
+				? `left: ${drawerOpen ? '0' : '-272px'}`
+				: ''}"
+		>
+			<!-- 64px, matching the topbar so the two align across the divider. -->
+			<div class="sidebar-header" class:justify-center={!expanded}>
+				<div class="sidebar-logo">AB</div>
+				{#if expanded}
+					<div class="min-w-0 flex-1">
+						<div class="sidebar-logo-text">Alfabroker</div>
+						<div class="sidebar-logo-sub">Gestión de pólizas</div>
+					</div>
+					<button
+						type="button"
+						class="btn-secondary btn-icon !w-[30px] !h-[30px]"
+						title={narrow ? 'Cerrar menú' : 'Colapsar menú'}
+						aria-label={narrow ? 'Cerrar menú' : 'Colapsar menú'}
+						on:click={narrow ? () => (drawerOpen = false) : toggleSidebar}
+					>
+						{#if narrow}
+							<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+								<path d="M6 6l12 12M18 6 6 18" />
+							</svg>
+						{:else}
+							<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+								<path d="M15 6l-6 6 6 6" />
+							</svg>
+						{/if}
+					</button>
+				{/if}
+			</div>
+
+			<nav class="sidebar-nav">
+				<!-- Collapsed, the header has no room for the toggle beside the logo,
+				     so it takes the rail's own icon-row idiom (tooltip included). -->
+				{#if !expanded}
+					<button
+						type="button"
+						class="sidebar-item"
+						title="Expandir menú"
+						aria-label="Expandir menú"
+						on:click={toggleSidebar}
+						on:mouseenter={(e) => showTip(e, 'Expandir menú')}
+						on:mouseleave={() => (tip = null)}
+					>
+						<span class="sidebar-item-bar"></span>
+						<svg
+							class="sidebar-item-icon"
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor"
+							stroke-width="1.5"
+							style="transform: rotate(180deg)"
+						>
+							<path d="M15 6l-6 6 6 6" />
+						</svg>
+					</button>
+				{/if}
+
+				{#each allowedGroups as group}
+					{#if group.label}
+						<div class="sidebar-group-label" style="opacity: {expanded ? 1 : 0}">{group.label}</div>
+					{/if}
+
+					{#each group.items as item}
 						<a
 							href={item.href}
 							class="sidebar-item {isActive(item.href, $page.url.pathname) ? 'sidebar-item-active' : ''}"
-							title={collapsed ? item.label : ''}
+							on:mouseenter={(e) => showTip(e, item.label)}
+							on:mouseleave={() => (tip = null)}
+							on:click={item.rubros ? togglePolizas : undefined}
 						>
-							<svg class="sidebar-item-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-								<path stroke-linecap="round" stroke-linejoin="round" d={item.icon} />
+							<span class="sidebar-item-bar"></span>
+							<svg
+								class="sidebar-item-icon"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="1.5"
+							>
+								<path d={item.d} />
+								<path d={item.d2} />
 							</svg>
-							{#if !collapsed}
-								<span class="sidebar-item-label">{item.label}</span>
+							<span class="sidebar-item-label" style="opacity: {expanded ? 1 : 0}">{item.label}</span>
+							{#if item.rubros && expanded}
+								<svg
+									class="flex-none"
+									width="15"
+									height="15"
+									viewBox="0 0 24 24"
+									fill="none"
+									stroke="currentColor"
+									stroke-width="1.5"
+									style="transform: rotate({subOpen ? 0 : -90}deg)"
+								>
+									<path d="M6 9l6 6 6-6" />
+								</svg>
 							{/if}
 						</a>
-					</li>
+
+						{#if item.rubros && subOpen && expanded}
+							<div class="sidebar-submenu">
+								{#each RUBROS as rubro}
+									<a
+										href="/propuestas?rubro={rubro.slug}"
+										class="sidebar-subitem {isActive('/propuestas', $page.url.pathname) &&
+										activeRubro === rubro.slug
+											? 'sidebar-subitem-active'
+											: ''}"
+									>
+										{rubro.label}
+									</a>
+								{/each}
+							</div>
+						{/if}
+					{/each}
 				{/each}
-			</ul>
-		</nav>
+			</nav>
 
-		<!-- Footer with Settings -->
-		<div class="sidebar-footer">
-			{#if $auth.user}
-				<div class="px-3 py-2 mb-2 text-xs text-secondary-500">
-					<div class="font-medium text-secondary-700">{$auth.user.usuario}</div>
-					<div>{$auth.user.tipo_usuario}</div>
-				</div>
-			{/if}
-
-			<button
-				class="sidebar-item"
-				on:click={logout}
-				title={collapsed ? 'Cerrar sesión' : ''}
-			>
-				<svg class="sidebar-item-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-					<path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6A2.25 2.25 0 005.25 5.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
-				</svg>
-				{#if !collapsed}
-					<span class="sidebar-item-label">Cerrar sesión</span>
+			<div class="sidebar-footer">
+				{#if userMenuOpen}
+					<div
+						class="fixed inset-0 z-[55]"
+						role="presentation"
+						on:click={() => (userMenuOpen = false)}
+					></div>
+					<div
+						class="absolute left-2.5 right-2.5 bottom-[calc(100%-2px)] z-[60] flex flex-col p-1.5"
+						style="background: var(--color-bg); border: 1px solid var(--color-divider); border-radius: var(--radius-lg); box-shadow: var(--shadow-md)"
+					>
+						<div class="px-2.5 py-2 text-xs" style="color: var(--color-text-55)">
+							{$auth.user?.usuario ?? ''}
+						</div>
+						<div class="menu-divider"></div>
+						<button type="button" class="menu-item menu-item-danger" on:click={logout}>
+							Cerrar sesión
+						</button>
+					</div>
 				{/if}
-			</button>
 
-			<button
-				class="sidebar-item"
-				on:click={toggleSidebar}
-				title={collapsed ? 'Expandir' : 'Colapsar'}
-			>
-				<svg 
-					class="sidebar-item-icon transition-transform duration-200 {collapsed ? 'rotate-180' : ''}" 
-					fill="none" 
-					viewBox="0 0 24 24" 
-					stroke="currentColor" 
-					stroke-width="1.5"
+				<button
+					type="button"
+					class="flex w-full items-center gap-2.5 rounded-xl p-1.5 text-left transition-colors hover:bg-[var(--color-accent-100)]"
+					aria-expanded={userMenuOpen}
+					on:click={() => (userMenuOpen = !userMenuOpen)}
 				>
-					<path stroke-linecap="round" stroke-linejoin="round" d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
-				</svg>
-				{#if !collapsed}
-					<span class="sidebar-item-label">Colapsar</span>
-				{/if}
-			</button>
-		</div>
-	</aside>
+					<span class="avatar avatar-circle">{initials(userLabel)}</span>
+					<span class="flex-1 min-w-0 block" style="opacity: {expanded ? 1 : 0}">
+						<span class="block text-sm font-medium overflow-hidden text-ellipsis whitespace-nowrap">
+							{userLabel}
+						</span>
+						<span class="block text-xs" style="color: var(--color-text-55)">
+							{$auth.user?.tipo_usuario ?? ''}
+						</span>
+					</span>
+				</button>
+			</div>
+		</aside>
 
-	<!-- Main Content -->
-	<main class="flex-1 flex flex-col min-w-0 overflow-auto">
-		<slot />
-	</main>
-</div>
-<Notifications />
+		<main class="flex-1 min-w-0 flex flex-col">
+			<TopBar {narrow} onOpenDrawer={() => (drawerOpen = true)} />
+			<slot />
+		</main>
+	</div>
+
+	{#if tip}
+		<div class="sidebar-tip" style="top: {tip.top}; left: {tip.left}">{tip.label}</div>
+	{/if}
+
+	<Notifications />
 {/if}

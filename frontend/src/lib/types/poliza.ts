@@ -52,6 +52,11 @@ export interface BasePoliza {
 	// Timestamps
 	created_at: string | null;
 	updated_at: string | null;
+
+	// Marcas de documentos generados. Nulo = nunca se generó.
+	// Ordenan el recorrido propuesta -> entrega sin tocar el enum de estado.
+	propuesta_generada_at: string | null;
+	entrega_generada_at: string | null;
 }
 
 // ============================================================================

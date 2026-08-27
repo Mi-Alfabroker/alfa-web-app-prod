@@ -1,4 +1,12 @@
 <script lang="ts">
+	/**
+	 * Button - thin wrapper over the .btn-* classes in app.css.
+	 *
+	 * It deliberately holds no colour or spacing of its own: when this
+	 * component carried its own Tailwind maps it drifted from .btn-primary
+	 * (white-on-gold here, ink-on-gold there), so the two rendered
+	 * differently on the same page.
+	 */
 	type ButtonVariant = 'primary' | 'secondary' | 'danger' | 'ghost';
 	type ButtonSize = 'sm' | 'md' | 'lg';
 
@@ -7,27 +15,20 @@
 	export let disabled: boolean = false;
 	export let loading: boolean = false;
 	export let type: 'button' | 'submit' | 'reset' = 'button';
-
-	const variantClasses: Record<ButtonVariant, string> = {
-		primary: 'bg-primary-600 text-white hover:bg-primary-700 focus:ring-primary-500',
-		secondary: 'bg-secondary-200 text-secondary-900 hover:bg-secondary-300 focus:ring-secondary-500',
-		danger: 'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500',
-		ghost: 'bg-transparent text-secondary-700 hover:bg-secondary-100 focus:ring-secondary-500'
-	};
+	/** Extra classes, e.g. `btn-block` or `btn-icon`. */
+	export let extraClass: string = '';
 
 	const sizeClasses: Record<ButtonSize, string> = {
-		sm: 'px-3 py-1.5 text-sm',
-		md: 'px-4 py-2 text-base',
-		lg: 'px-6 py-3 text-lg'
+		sm: 'btn-sm',
+		md: '',
+		lg: 'btn-lg'
 	};
 </script>
 
 <button
 	{type}
 	disabled={disabled || loading}
-	class="inline-flex items-center justify-center font-medium rounded-lg transition-colors duration-200 
-		focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed
-		{variantClasses[variant]} {sizeClasses[size]}"
+	class="btn-{variant} {sizeClasses[size]} {extraClass}"
 	on:click
 >
 	{#if loading}

@@ -1,36 +1,15 @@
 <script lang="ts">
+	/**
+	 * There is no read-only cliente detail screen: the list opens a ficha modal
+	 * and all editing happens on /clientes/[id]/editar. This route only ever
+	 * held a placeholder, so it forwards to the editor — which is where links
+	 * such as the topbar search results expect to land.
+	 */
+	import { onMount } from 'svelte';
+	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
-	import { APP_NAME } from '$lib/config';
 
-	$: id = $page.params.id;
+	onMount(() => {
+		void goto(`/clientes/${$page.params.id}/editar`, { replaceState: true });
+	});
 </script>
-
-<svelte:head>
-	<title>Cliente #{id} | {APP_NAME}</title>
-</svelte:head>
-
-<!-- Header -->
-<header class="page-header">
-	<div class="flex items-center gap-4">
-		<a href="/clientes" class="page-back-link">
-			<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-				<path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
-			</svg>
-			<span>Volver</span>
-		</a>
-		<h1 class="page-title">Cliente #{id}</h1>
-	</div>
-	<span class="badge badge-success">Activo</span>
-</header>
-
-<!-- Content -->
-<div class="page-content">
-	<div class="card max-w-4xl mx-auto">
-		<div class="empty-state">
-			<div class="empty-state-icon">👤</div>
-			<p class="empty-state-title">Detalle de Cliente</p>
-			<p class="empty-state-text">ID: {id}</p>
-			<p class="empty-state-text">Aquí se mostrará el formulario de edición</p>
-		</div>
-	</div>
-</div>

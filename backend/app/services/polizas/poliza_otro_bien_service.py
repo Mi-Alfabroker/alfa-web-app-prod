@@ -1,6 +1,6 @@
 """Business logic service for PolizaOtroBien (Other Asset Insurance Policy) operations."""
 from typing import Optional, List
-from datetime import date
+from datetime import date, datetime, timezone
 from app.models.polizas.poliza_otro_bien import PolizaOtroBien
 from app.models.polizas.base_poliza import BasePolizaMixin, EstadoPoliza
 from app.repositories.polizas import poliza_otro_bien_repository
@@ -166,6 +166,39 @@ class PolizaOtroBienService:
             return {}, error
         
         updated = poliza_otro_bien_repository.update_estado(poliza, nuevo_estado)
+        return updated.to_dict(), None
+
+
+    @staticmethod
+    def marcar_documento(poliza_id: int, documento: str) -> tuple[dict, Optional[str]]:
+        """
+        Record that a generated document exists for this policy.
+
+        Kept out of /api/propuestas/generate on purpose: that endpoint receives a
+        template name and a variables dict and has no idea which policy the
+        document came from, so passing it the id would couple the proposal
+        service to the policy service.
+
+        Args:
+            poliza_id: The policy ID
+            documento: 'propuesta' or 'entrega'
+
+        Returns:
+            Tuple of (updated policy dict, error message or None)
+        """
+        campos = {
+            'propuesta': 'propuesta_generada_at',
+            'entrega': 'entrega_generada_at',
+        }
+        campo = campos.get(documento)
+        if campo is None:
+            return {}, "documento debe ser 'propuesta' o 'entrega'"
+
+        poliza = poliza_otro_bien_repository.get_by_id(poliza_id)
+        if not poliza:
+            return {}, f"PolizaOtroBien with ID {poliza_id} not found"
+
+        updated = poliza_otro_bien_repository.marcar_documento(poliza, campo)
         return updated.to_dict(), None
 
     @staticmethod

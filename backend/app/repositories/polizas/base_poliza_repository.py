@@ -1,6 +1,6 @@
 """Base repository for Poliza (Insurance Policy) data access operations."""
 from typing import Optional, TypeVar, Generic, Type, List
-from datetime import date
+from datetime import date, datetime, timezone
 from app.models import db
 from app.models.polizas.base_poliza import EstadoPoliza
 
@@ -145,6 +145,26 @@ class BasePolizaRepository(Generic[T]):
             The updated policy instance
         """
         poliza.estado = nuevo_estado
+        db.session.commit()
+        return poliza
+
+    def marcar_documento(self, poliza: T, campo: str) -> T:
+        """
+        Stamp a generated-document marker with the current time.
+
+        A targeted mutation like update_estado, deliberately NOT routed through
+        update()/UPDATABLE_FIELDS: whitelisting these columns would also make
+        them writable from the generic PUT endpoint, letting a client forge the
+        marker that gates delivery behind proposal generation.
+
+        Args:
+            poliza: The policy instance
+            campo: 'propuesta_generada_at' or 'entrega_generada_at'
+
+        Returns:
+            The updated policy instance
+        """
+        setattr(poliza, campo, datetime.now(timezone.utc))
         db.session.commit()
         return poliza
 

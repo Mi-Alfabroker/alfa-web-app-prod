@@ -9,14 +9,10 @@
 		"skipLibCheck": true,
 		"sourceMap": true,
 		"strict": true,
-		"moduleResolution": "bundler",
-		"paths": {
-			"$lib/*": ["./src/lib/*"],
-			"$components/*": ["./src/lib/components/*"],
-			"$services/*": ["./src/lib/services/*"],
-			"$stores/*": ["./src/lib/stores/*"],
-			"$utils/*": ["./src/lib/utils/*"],
-			"$types/*": ["./src/lib/types/*"]
-		}
+		"moduleResolution": "bundler"
+		// Path aliases are inherited from ./.svelte-kit/tsconfig.json, which
+		// SvelteKit generates from `kit.alias` in svelte.config.js. Redeclaring
+		// `paths` here replaces that map wholesale, which previously dropped
+		// `$constants` and every bare (non-subpath) alias such as `$utils`.
 	}
 }

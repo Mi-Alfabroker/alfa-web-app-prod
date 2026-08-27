@@ -3,7 +3,7 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { APP_NAME } from '$lib/config';
-	import { FormSection, FormField, Input, Select, CurrencyInput } from '$components';
+	import { CurrencyInput, FormField, FormSection, Input, PageHeader, Select } from '$components';
 	import { bienService, clienteService } from '$services';
 	import { VehiculoFields } from '$constants';
 	import type { Cliente } from '$lib/types/cliente';
@@ -77,18 +77,14 @@
 	<title>Editar Vehículo | {APP_NAME}</title>
 </svelte:head>
 
-<header class="page-header">
-	<div class="flex items-center gap-4">
-		<a href="/bienes" class="page-back-link">
-			<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-				<path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
-			</svg>
-			<span>Volver</span>
-		</a>
-	</div>
-</header>
+<div class="page-shell">
+	<PageHeader
+		title="Editar vehículo #{id}"
+		crumb="Inicio / Operación / Bienes"
+		backHref="/bienes"
+		backLabel="Volver a bienes"
+	/>
 
-<div class="page-content">
 	<div class="max-w-4xl mx-auto">
 		{#if loading}
 			<div class="flex items-center justify-center py-12">
@@ -103,7 +99,6 @@
 			</div>
 		{:else}
 			<form class="form-container" on:submit|preventDefault={handleSubmit}>
-				<h1 class="form-title">Editar Vehículo #{id}</h1>
 
 				{#if error}
 					<div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
@@ -119,7 +114,7 @@
 				</FormSection>
 
 				<FormSection title="Datos del Vehículo" bind:open={sections.datos.open}>
-					<div class="space-y-4">
+					<div class="field-pairs">
 						<FormField label={VehiculoFields.tipo_vehiculo.label}>
 							<Select bind:value={formData.tipo_vehiculo} options={tipoVehiculoOptions} disabled={saving} />
 						</FormField>
@@ -145,7 +140,7 @@
 				</FormSection>
 
 				<FormSection title="Valores" bind:open={sections.valores.open}>
-					<div class="space-y-4">
+					<div class="field-pairs">
 						<FormField label={VehiculoFields.valor_vehiculo.label}>
 							<CurrencyInput bind:value={formData.valor_vehiculo} disabled={saving} />
 						</FormField>

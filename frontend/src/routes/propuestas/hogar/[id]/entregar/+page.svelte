@@ -3,8 +3,9 @@
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 	import { APP_NAME } from '$lib/config';
-	import { FormularioEntrega, Button, Loading } from '$components';
+	import { Button, EmptyState, FlujoPoliza, FormularioEntrega, Loading, PageHeader } from '$components';
 	import { polizaService, aseguradoraService } from '$services';
+	import { flujoPoliza } from '$utils';
 	import { addNotification } from '$lib/stores/notifications';
 	import type { PolizaHogar } from '$lib/types/poliza';
 	import type { Aseguradora } from '$lib/types/aseguradora';
@@ -204,6 +205,11 @@
 	$: valorPrimaSeleccionada = poliza && formData.aseguradora_numero 
 		? (poliza as any)[`valor_prima_aseg_${formData.aseguradora_numero}`] || 0
 		: 0;
+
+	// Mismo origen que el detalle y la lista: el bloqueo no puede contradecirlos.
+	$: pasoEntrega = poliza
+		? flujoPoliza(poliza, 'hogar').pasos.find((p) => p.id === 'entrega')
+		: null;
 </script>
 
 <svelte:head>
@@ -211,31 +217,19 @@
 </svelte:head>
 
 <!-- Header -->
-<header class="page-header">
-	<div class="flex items-center gap-4">
-		<button 
-			type="button" 
-			class="p-2 hover:bg-secondary-100 rounded-lg transition-colors"
-			on:click={handleCancel}
-		>
-			<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-				<path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
-			</svg>
-		</button>
+<div class="page-shell">
+	<PageHeader
+		title="Entregar póliza"
+		crumb="Inicio / Operación / Pólizas"
+		subtitle={poliza ? `${poliza.consecutivo} · Hogar` : 'Hogar'}
+		backHref="/propuestas/hogar/{polizaId}"
+		backLabel="Volver a la póliza"
+	/>
 
-		<div>
-			<h1 class="page-title">Entregar Póliza</h1>
-			<p class="text-sm text-secondary-600">
-				{#if poliza}
-					{poliza.consecutivo} - Hogar
-				{/if}
-			</p>
-		</div>
-	</div>
-</header>
+	{#if poliza}
+		<FlujoPoliza {poliza} rubroSlug="hogar" pasoActual="entrega" />
+	{/if}
 
-<!-- Main Content -->
-<main class="page-content">
 	{#if loading}
 		<Loading />
 	{:else if error && !poliza}
@@ -243,6 +237,12 @@
 			<p>{error}</p>
 			<Button on:click={handleCancel}>Volver</Button>
 		</div>
+	{:else if poliza && pasoEntrega && !pasoEntrega.enabled}
+		<EmptyState title="Falta generar la propuesta" text={pasoEntrega.blockedReason}>
+			<a slot="action" class="btn-primary" href="/propuestas/hogar/{polizaId}/generar">
+				Generar propuesta
+			</a>
+		</EmptyState>
 	{:else if poliza}
 		<form on:submit={handleSubmit} class="max-w-5xl mx-auto">
 			<div class="bg-white rounded-xl shadow-lg overflow-hidden p-6">
@@ -294,4 +294,4 @@
 			</div>
 		</form>
 	{/if}
-</main>
+</div>
