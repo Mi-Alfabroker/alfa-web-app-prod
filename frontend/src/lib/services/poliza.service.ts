@@ -48,6 +48,14 @@ export const polizaHogarService = {
 		return response.data;
 	},
 
+	async marcarDocumento(id: number, documento: 'propuesta' | 'entrega'): Promise<PolizaHogar> {
+		const response = await api.patch<ApiResponse<PolizaHogar>>(
+			`${BASE_ENDPOINT}/hogar/${id}/marcar-documento`,
+			{ documento }
+		);
+		return response.data;
+	},
+
 	async cambiarEstado(id: number, data: CambiarEstadoDto): Promise<PolizaHogar> {
 		const response = await api.patch<ApiResponse<PolizaHogar>>(`${BASE_ENDPOINT}/hogar/${id}/estado`, data);
 		return response.data;
@@ -105,6 +113,14 @@ export const polizaVehiculoService = {
 
 	async update(id: number, data: UpdatePolizaVehiculoDto): Promise<PolizaVehiculo> {
 		const response = await api.put<ApiResponse<PolizaVehiculo>>(`${BASE_ENDPOINT}/vehiculo/${id}`, data);
+		return response.data;
+	},
+
+	async marcarDocumento(id: number, documento: 'propuesta' | 'entrega'): Promise<PolizaVehiculo> {
+		const response = await api.patch<ApiResponse<PolizaVehiculo>>(
+			`${BASE_ENDPOINT}/vehiculo/${id}/marcar-documento`,
+			{ documento }
+		);
 		return response.data;
 	},
 
@@ -167,6 +183,14 @@ export const polizaCopropiedadService = {
 		return response.data;
 	},
 
+	async marcarDocumento(id: number, documento: 'propuesta' | 'entrega'): Promise<PolizaCopropiedad> {
+		const response = await api.patch<ApiResponse<PolizaCopropiedad>>(
+			`${BASE_ENDPOINT}/copropiedad/${id}/marcar-documento`,
+			{ documento }
+		);
+		return response.data;
+	},
+
 	async cambiarEstado(id: number, data: CambiarEstadoDto): Promise<PolizaCopropiedad> {
 		const response = await api.patch<ApiResponse<PolizaCopropiedad>>(`${BASE_ENDPOINT}/copropiedad/${id}/estado`, data);
 		return response.data;
@@ -223,6 +247,14 @@ export const polizaOtroBienService = {
 
 	async update(id: number, data: UpdatePolizaOtroBienDto): Promise<PolizaOtroBien> {
 		const response = await api.put<ApiResponse<PolizaOtroBien>>(`${BASE_ENDPOINT}/otro-bien/${id}`, data);
+		return response.data;
+	},
+
+	async marcarDocumento(id: number, documento: 'propuesta' | 'entrega'): Promise<PolizaOtroBien> {
+		const response = await api.patch<ApiResponse<PolizaOtroBien>>(
+			`${BASE_ENDPOINT}/otro-bien/${id}/marcar-documento`,
+			{ documento }
+		);
 		return response.data;
 	},
 

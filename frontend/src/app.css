@@ -3,6 +3,81 @@
 @tailwind utilities;
 
 /* ============================================
+   DESIGN TOKENS
+   Ported from the Claude Design project
+   "Alfabroker Admin" (industry design system).
+
+   These variables serve the hand-styled components; the @apply component
+   classes below keep using the Tailwind scales. Both paths resolve to the
+   SAME hexes, so there is one palette with two access styles.
+   ============================================ */
+:root {
+	/* Surfaces — cards/sidebar/topbar sit LIGHTER than the page. */
+	--color-bg: #f2f2f3;
+	--color-surface: #e9e9ea;
+	--color-text: #1d1f20;
+	--color-divider: color-mix(in srgb, #1d1f20 16%, transparent);
+
+	/* Muted text, in three weights.
+	   The design's own tiers run 42–60% ink; measured against these surfaces the
+	   lightest two land at 3.2–3.3:1, under the 4.5:1 minimum for body text. The
+	   scale is shifted up so all three clear 4.5:1 while keeping three visibly
+	   distinct steps. Variable names keep the design's numbering. */
+	--color-text-60: color-mix(in srgb, #1d1f20 66%, transparent);
+	--color-text-55: color-mix(in srgb, #1d1f20 60%, transparent);
+	--color-text-45: color-mix(in srgb, #1d1f20 55%, transparent);
+
+	/* Accent — the Alfabroker brand gold (Tailwind `primary`). */
+	--color-accent: #e5b94e;
+	--color-accent-100: #fdf9e9;
+	--color-accent-200: #fbf0c8;
+	--color-accent-300: #f7e4a0;
+	--color-accent-400: #f0ce6f;
+	--color-accent-500: #e5b94e;
+	--color-accent-600: #d4a53b;
+	--color-accent-700: #b08a2e;
+	--color-accent-800: #8d6e25;
+	--color-accent-900: #735a1f;
+
+	/* Text/icons ON gold fills. The brand gold is light: white never clears
+	   contrast on it, so filled accent surfaces always carry this ink. */
+	--color-accent-ink: #4a3912;
+
+	/* Accent-2 — slate (Tailwind `secondary`), for the "pending / info" state.
+	   The design collapses accent-2 into the same gold as accent, which makes
+	   e.g. Vigente and Por renovar identical; slate keeps them distinct. */
+	--color-accent-2: #64748b;
+	--color-accent-2-100: #f1f5f9;
+	--color-accent-2-200: #e2e8f0;
+	--color-accent-2-300: #cbd5e1;
+	--color-accent-2-400: #94a3b8;
+	--color-accent-2-500: #64748b;
+	--color-accent-2-600: #475569;
+	--color-accent-2-700: #334155;
+	--color-accent-2-800: #1e293b;
+	--color-accent-2-900: #0f172a;
+
+	--font-heading: 'Barlow Condensed', system-ui, sans-serif;
+	--font-heading-weight: 600;
+	--font-body: 'Barlow', system-ui, sans-serif;
+
+	--radius-sm: 9px;
+	--radius-md: 10px;
+	--radius-lg: 12px;
+	--radius-xl: 14px;
+	--radius-2xl: 16px;
+
+	--shadow-sm: 0 1px 2px color-mix(in srgb, #2b2b2d 14%, transparent);
+	--shadow-md: 0 3px 10px color-mix(in srgb, #2b2b2d 16%, transparent);
+	--shadow-lg: 0 12px 32px color-mix(in srgb, #2b2b2d 22%, transparent);
+
+	/* Shell metrics, shared by the sidebar and the drawer overlay. */
+	--sidebar-width: 260px;
+	--sidebar-width-collapsed: 72px;
+	--topbar-height: 64px;
+}
+
+/* ============================================
    BASE STYLES
    ============================================ */
 @layer base {
@@ -11,7 +86,31 @@
 	}
 
 	body {
-		@apply font-sans antialiased bg-secondary-100 text-secondary-900;
+		@apply antialiased;
+		background: var(--color-surface);
+		color: var(--color-text);
+		font-family: var(--font-body);
+		font-size: 15px;
+		line-height: 1.55;
+	}
+
+	h1,
+	h2,
+	h3,
+	h4 {
+		font-family: var(--font-heading);
+		font-weight: var(--font-heading-weight);
+		line-height: 1.12;
+		letter-spacing: -0.015em;
+	}
+
+	:focus-visible {
+		outline: 2px solid var(--color-accent-600);
+		outline-offset: 2px;
+	}
+
+	::selection {
+		background: var(--color-accent-200);
 	}
 }
 
@@ -34,13 +133,40 @@
 		       active:bg-primary-600 font-semibold;
 	}
 
+	/* Outlined, per the design: a hairline edge on the card surface rather
+	   than a filled slate chip. */
 	.btn-secondary {
-		@apply btn bg-secondary-200 text-secondary-700 hover:bg-secondary-300 focus:ring-secondary-400
-		       active:bg-secondary-400;
+		@apply btn bg-transparent focus:ring-secondary-400;
+		border: 1px solid var(--color-divider);
+		color: var(--color-text);
+	}
+
+	.btn-secondary:hover {
+		background: color-mix(in srgb, var(--color-text) 7%, transparent);
+	}
+
+	.btn-secondary:active {
+		background: color-mix(in srgb, var(--color-text) 14%, transparent);
 	}
 
 	.btn-ghost {
-		@apply btn bg-transparent text-secondary-600 hover:bg-secondary-100 focus:ring-secondary-300;
+		@apply btn bg-transparent focus:ring-primary-300;
+		color: var(--color-accent-900);
+	}
+
+	.btn-ghost:hover {
+		background: var(--color-accent-100);
+	}
+
+	/* Square icon-only button. */
+	.btn-icon {
+		@apply p-0 flex-none;
+		width: 36px;
+		height: 36px;
+	}
+
+	.btn-block {
+		@apply w-full;
 	}
 
 	.btn-danger {
@@ -59,11 +185,46 @@
 	   CARDS
 	   -------------------------------------------- */
 	.card {
-		@apply bg-white rounded-2xl shadow-sm border border-secondary-200 p-6;
+		@apply rounded-2xl shadow-sm p-6;
+		background: var(--color-bg);
+		border: 1px solid var(--color-divider);
 	}
 
 	.card-flat {
-		@apply bg-white rounded-2xl p-6;
+		@apply rounded-2xl p-6;
+		background: var(--color-bg);
+	}
+
+	/* Section heading inside a card, per the design's 18px h3. */
+	.card-heading {
+		font-family: var(--font-heading);
+		font-weight: var(--font-heading-weight);
+		@apply text-lg mb-3;
+	}
+
+	/* Label / value pair used by every metadata grid in the design. */
+	.field-label {
+		@apply text-xs;
+		color: var(--color-text-55);
+	}
+
+	.field-value {
+		@apply text-sm font-medium;
+		/* Long unbroken values (emails, URLs) must wrap rather than run into the
+		   next grid column. */
+		overflow-wrap: anywhere;
+	}
+
+	/* auto-fit metadata grid — the design's repeat(auto-fit, minmax(146px, 1fr)). */
+	.field-grid {
+		@apply grid gap-x-5 gap-y-2.5;
+		grid-template-columns: repeat(auto-fit, minmax(146px, 1fr));
+	}
+
+	/* Grid items default to min-width:auto, which lets wide content push past
+	   the track instead of wrapping inside it. */
+	.field-grid > * {
+		min-width: 0;
 	}
 
 	/* --------------------------------------------
@@ -71,11 +232,20 @@
 	   Main form wrapper with title
 	   -------------------------------------------- */
 	.form-container {
-		@apply bg-white rounded-2xl shadow-sm p-8;
+		@apply rounded-2xl shadow-sm p-8;
+		background: var(--color-bg);
+		border: 1px solid var(--color-divider);
 	}
 
 	.form-title {
-		@apply text-2xl font-semibold text-secondary-900 mb-8;
+		@apply text-2xl mb-8;
+		font-family: var(--font-heading);
+		font-weight: var(--font-heading-weight);
+	}
+
+	/* Used by the cliente/aseguradora editar pages; previously undeclared. */
+	.form-title-section {
+		@apply flex items-end justify-between gap-4 flex-wrap mb-6;
 	}
 
 	/* --------------------------------------------
@@ -83,7 +253,8 @@
 	   Collapsible sections with status indicator
 	   -------------------------------------------- */
 	.form-section {
-		@apply border-t border-secondary-200 first:border-t-0;
+		@apply first:border-t-0;
+		border-top: 1px solid var(--color-divider);
 	}
 
 	.form-section-header {
@@ -96,7 +267,10 @@
 	}
 
 	.form-section-title-text {
-		@apply text-base font-medium text-secondary-800;
+		font-family: var(--font-heading);
+		font-weight: var(--font-heading-weight);
+		font-size: 17px;
+		line-height: 1.2;
 	}
 
 	/* Status indicator circle */
@@ -121,34 +295,151 @@
 		@apply rotate-180;
 	}
 
-	/* Section content */
+	/* Section content — rejilla de dos columnas.
+	   La causa de que los formularios se vieran infinitos era una sola línea:
+	   un campo por fila, siempre. Con la etiqueta arriba (ver FormField) caben
+	   dos por fila, y `.form-field-wide` recupera la fila completa donde hace
+	   falta. */
 	.form-section-content {
-		@apply pb-6 space-y-6;
+		@apply grid pb-6 gap-x-5 gap-y-4;
+		/* Dos columnas explícitas, no `auto-fit`: junto a un hijo con
+		   `grid-column: 1 / -1` (los campos anchos), auto-fit colapsa la segunda
+		   pista a 0px y todo vuelve a una columna. */
+		grid-template-columns: 1fr;
+	}
+
+	@media (min-width: 768px) {
+		.form-section-content {
+			grid-template-columns: 1fr 1fr;
+		}
+	}
+
+	/* Sin esto, un control ancho estira su columna en vez de ajustarse. */
+	.form-section-content > * {
+		min-width: 0;
+	}
+
+	/* Sólo los campos ocupan media fila. Cualquier otro hijo —un párrafo
+	   descriptivo, una tarjeta, una sub-rejilla— abarca el ancho completo: al
+	   dejarlos competir por una celda, el texto de "Opciones de aseguradoras"
+	   quedaba a la izquierda y la primera opción a la derecha. */
+	.form-section-content > * {
+		grid-column: 1 / -1;
+	}
+
+	.form-section-content > .form-field-vertical,
+	.form-section-content > .form-field {
+		grid-column: auto;
+	}
+
+	.form-section-content > .form-field-wide {
+		grid-column: 1 / -1;
+	}
+
+	/* Grupo de campos dentro de una sección.
+	   Antes eran `space-y-4`: un único hijo de la rejilla, ocupando la fila
+	   entera y apilando sus campos dentro. Con eso, poner la sección en dos
+	   columnas no cambiaba nada — la mayoría de los campos vivían aquí. */
+	.field-pairs {
+		@apply grid gap-x-5 gap-y-4;
+		grid-template-columns: 1fr;
+	}
+
+	@media (min-width: 768px) {
+		.field-pairs {
+			grid-template-columns: 1fr 1fr;
+		}
+	}
+
+	.field-pairs > * {
+		min-width: 0;
+	}
+
+	.field-pairs > .form-field-wide {
+		grid-column: 1 / -1;
+	}
+
+	/* Nota introductoria de una sección: explica el bloque, no un campo. */
+	.form-section-note {
+		@apply text-sm;
+		color: var(--color-text-60);
+		margin: -2px 0 2px;
+	}
+
+	/* --------------------------------------------
+	   COTIZACIONES
+	   Las cinco opciones de aseguradora del formulario de propuesta. Rejilla
+	   propia porque son un bloque dentro de la sección, no campos sueltos.
+	   -------------------------------------------- */
+	.quote-grid {
+		@apply grid gap-2.5;
+		grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+	}
+
+	.quote-card {
+		@apply flex flex-col gap-3 rounded-xl;
+		padding: 13px 14px;
+		background: var(--color-bg);
+		border: 1px solid var(--color-divider);
+	}
+
+	.quote-card:focus-within {
+		border-color: var(--color-accent-400);
+	}
+
+	.quote-card-title {
+		@apply text-xs uppercase;
+		letter-spacing: 0.05em;
+		color: var(--color-accent-800);
 	}
 
 	/* --------------------------------------------
 	   FORM FIELD
-	   Horizontal layout: label left, input right
+	   Etiqueta arriba por defecto; `.form-field` es el layout antiguo de
+	   etiqueta a la izquierda, disponible con la prop `horizontal`.
 	   -------------------------------------------- */
 	.form-field {
 		@apply grid grid-cols-1 md:grid-cols-[280px_1fr] gap-2 md:gap-6 items-start;
 	}
 
 	.form-field-vertical {
-		@apply flex flex-col gap-2;
+		@apply flex flex-col;
+		gap: 6px;
 	}
 
 	/* Label container */
 	.form-label-group {
-		@apply flex flex-col gap-0.5 pt-2;
+		@apply flex flex-col gap-0.5;
 	}
 
+	/* El layout horizontal necesita empujar la etiqueta para alinearla con el
+	   control; el vertical, no. */
+	.form-field > .form-label-group {
+		@apply pt-2;
+	}
+
+	/* 13px / 500, la métrica de etiqueta del sistema de diseño. */
 	.form-label {
-		@apply text-sm font-medium text-secondary-800;
+		font-size: 13px;
+		font-weight: 500;
+		line-height: 1.3;
+	}
+
+	.form-required {
+		color: var(--color-accent-800);
+		margin-left: 1px;
+	}
+
+	/* Ayuda bajo el control: subordinada, no compite con la etiqueta. */
+	.form-field-hint {
+		font-size: 11.5px;
+		line-height: 1.4;
+		color: var(--color-text-55);
 	}
 
 	.form-label-helper {
-		@apply text-xs text-secondary-400 leading-relaxed;
+		@apply text-xs leading-relaxed;
+		color: var(--color-text-55);
 	}
 
 	/* Input container */
@@ -164,11 +455,27 @@
 	   INPUTS
 	   -------------------------------------------- */
 	.input {
-		@apply w-full px-4 py-2.5 text-sm bg-secondary-50 border border-secondary-200 rounded-lg 
+		@apply w-full px-4 py-2.5 text-sm rounded-lg
 		       placeholder:text-secondary-400
-		       focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-400 
-		       focus:bg-white
+		       focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500
 		       transition-all duration-200;
+		min-height: 40px;
+		/* longhand, not the `background` shorthand: `.select` applies `.input`
+		   and then layers its own chevron background-image on top. */
+		background-color: var(--color-surface);
+		border: 1px solid var(--color-divider);
+	}
+
+	.input:hover,
+	.select:hover,
+	.textarea:hover {
+		border-color: color-mix(in srgb, var(--color-text) 40%, transparent);
+	}
+
+	.input:focus,
+	.select:focus,
+	.textarea:focus {
+		background-color: var(--color-bg);
 	}
 
 	.input-error {
@@ -181,7 +488,8 @@
 
 	/* Input helper text below input */
 	.input-helper {
-		@apply text-xs text-primary-700;
+		@apply text-xs;
+		color: var(--color-accent-900);
 	}
 
 	.input-error-text {
@@ -222,8 +530,13 @@
 	   FORM ACTIONS
 	   Button group for form submission
 	   -------------------------------------------- */
+	/* Pie de formulario. Se probó pegajoso al fondo y se descartó: dentro de una
+	   tarjeta alta terminaba montado sobre los campos en vez de flotar bajo
+	   ellos, y el problema real —formularios larguísimos— se resuelve con la
+	   densidad, no tapando contenido. */
 	.form-actions {
-		@apply flex items-center justify-end gap-3 pt-6 mt-6 border-t border-secondary-200;
+		@apply flex items-center justify-end gap-3 pt-5 mt-6;
+		border-top: 1px solid var(--color-divider);
 	}
 
 	/* --------------------------------------------
@@ -231,15 +544,20 @@
 	   e.g., "+ Agregar dirección alternativa"
 	   -------------------------------------------- */
 	.link-button {
-		@apply text-sm text-primary-600 hover:text-primary-700 font-medium 
-		       transition-colors cursor-pointer inline-flex items-center gap-1;
+		@apply text-sm font-medium transition-colors cursor-pointer inline-flex items-center gap-1;
+		color: var(--color-accent-900);
+	}
+
+	.link-button:hover {
+		color: var(--color-accent-ink);
 	}
 
 	/* --------------------------------------------
 	   TABLES
 	   -------------------------------------------- */
 	.table-container {
-		@apply overflow-x-auto rounded-lg border border-secondary-200;
+		@apply overflow-x-auto rounded-lg;
+		border: 1px solid var(--color-divider);
 	}
 
 	.table {
@@ -247,12 +565,15 @@
 	}
 
 	.table th {
-		@apply px-4 py-3 text-left font-medium text-secondary-600 bg-secondary-50 
-		       border-b border-secondary-200;
+		@apply px-4 py-3 text-left text-xs font-medium uppercase tracking-wider;
+		color: var(--color-text-55);
+		background: var(--color-surface);
+		border-bottom: 1px solid var(--color-divider);
 	}
 
 	.table td {
-		@apply px-4 py-3 text-secondary-700 border-b border-secondary-100;
+		@apply px-4 py-3;
+		border-bottom: 1px solid color-mix(in srgb, var(--color-text) 8%, transparent);
 	}
 
 	.table tr:last-child td {
@@ -293,102 +614,173 @@
 	/* --------------------------------------------
 	   PAGE HEADER
 	   -------------------------------------------- */
-	.page-header {
-		@apply h-16 bg-white border-b border-secondary-200 flex items-center justify-between px-6;
-	}
-
-	.page-title {
-		@apply text-xl font-semibold text-secondary-900;
-	}
-
-	.page-back-link {
-		@apply text-secondary-400 hover:text-secondary-600 transition-colors flex items-center gap-2;
-	}
-
-	/* --------------------------------------------
-	   PAGE CONTENT
-	   -------------------------------------------- */
-	.page-content {
-		@apply flex-1 p-6;
-	}
-
 	/* --------------------------------------------
 	   SIDEBAR
-	   Collapsible navigation sidebar
+	   260px expanded / 72px collapsed, drawer under 768px
 	   -------------------------------------------- */
 	.sidebar {
-		@apply bg-white flex flex-col flex-shrink-0 transition-all duration-300 ease-in-out
-		       border-r border-secondary-200;
+		@apply flex flex-col flex-none;
+		background: var(--color-bg);
+		border-right: 1px solid var(--color-divider);
+		transition: width 0.16s ease, left 0.18s ease;
 	}
 
 	.sidebar-expanded {
-		@apply w-64;
+		width: var(--sidebar-width);
 	}
 
 	.sidebar-collapsed {
-		@apply w-20;
+		width: var(--sidebar-width-collapsed);
 	}
 
 	/* Sidebar Header with Logo */
 	.sidebar-header {
-		@apply h-20 flex items-center gap-3 px-5 mt-2;
+		@apply flex items-center gap-3 flex-none px-3.5;
+		height: var(--topbar-height);
 	}
 
 	.sidebar-logo {
-		@apply w-11 h-11 rounded-xl bg-primary-500 flex items-center justify-center flex-shrink-0
-		       shadow-sm;
+		@apply w-9 h-9 rounded-xl grid place-items-center flex-none text-sm;
+		background: var(--color-accent);
+		color: var(--color-accent-ink);
+		font-family: var(--font-heading);
+		font-weight: var(--font-heading-weight);
 	}
 
 	.sidebar-logo-text {
-		@apply text-lg font-bold text-secondary-900 whitespace-nowrap;
+		@apply text-lg whitespace-nowrap;
+		font-family: var(--font-heading);
+		font-weight: var(--font-heading-weight);
+		line-height: 1;
+	}
+
+	.sidebar-logo-sub {
+		@apply text-xs whitespace-nowrap overflow-hidden text-ellipsis;
+		color: var(--color-text-45);
 	}
 
 	/* Sidebar Navigation */
 	.sidebar-nav {
-		@apply flex-1 px-3 py-4 overflow-y-auto;
+		@apply flex-1 flex flex-col gap-0.5 overflow-y-auto overflow-x-hidden;
+		padding: 6px 10px 10px;
 	}
 
-	/* Sidebar Item */
+	.sidebar-group-label {
+		@apply text-xs uppercase whitespace-nowrap;
+		letter-spacing: 0.06em;
+		color: var(--color-text-45);
+		padding: 14px 11px 6px;
+	}
+
+	/* Sidebar Item — the 3px active bar is a child span, so it can animate
+	   independently of the item's own background. */
 	.sidebar-item {
-		@apply flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200
-		       text-secondary-500 hover:bg-secondary-50 hover:text-secondary-700
-		       cursor-pointer w-full;
+		@apply relative flex items-center gap-3 w-full overflow-hidden cursor-pointer
+		       text-sm text-left transition-colors;
+		padding: 10px 11px;
+		border-radius: var(--radius-md);
+		color: var(--color-text);
+	}
+
+	.sidebar-item:hover {
+		background: var(--color-accent-100);
 	}
 
 	.sidebar-item-active {
-		@apply bg-primary-100 text-primary-800 font-medium;
+		background: var(--color-accent-100);
+		color: var(--color-accent-900);
+		font-weight: 600;
+	}
+
+	.sidebar-item-bar {
+		@apply absolute left-0 w-0.5 rounded-r;
+		top: 9px;
+		bottom: 9px;
+		background: transparent;
+	}
+
+	.sidebar-item-active .sidebar-item-bar {
+		background: var(--color-accent-600);
 	}
 
 	.sidebar-item-icon {
-		@apply w-5 h-5 flex-shrink-0;
+		@apply w-[18px] h-[18px] flex-none;
 	}
 
 	.sidebar-item-label {
-		@apply text-sm whitespace-nowrap;
+		@apply flex-1 whitespace-nowrap;
+	}
+
+	/* Pólizas rubro submenu */
+	.sidebar-submenu {
+		@apply flex flex-col gap-0.5;
+		margin: 1px 0 4px 22px;
+		padding-left: 12px;
+		border-left: 1px solid var(--color-divider);
+	}
+
+	.sidebar-subitem {
+		@apply text-left cursor-pointer rounded-lg transition-colors;
+		padding: 7px 10px;
+		font-size: 13.5px;
+		color: var(--color-text);
+	}
+
+	.sidebar-subitem:hover {
+		background: var(--color-accent-100);
+	}
+
+	.sidebar-subitem-active {
+		background: var(--color-accent-100);
+		color: var(--color-accent-900);
+		font-weight: 500;
 	}
 
 	/* Sidebar Footer */
 	.sidebar-footer {
-		@apply px-3 py-4 border-t border-secondary-100;
+		@apply relative flex-none p-2.5;
+		border-top: 1px solid var(--color-divider);
+	}
+
+	/* Tooltip shown for collapsed nav items */
+	.sidebar-tip {
+		@apply fixed text-xs whitespace-nowrap pointer-events-none;
+		transform: translateY(-50%);
+		background: var(--color-accent-900);
+		color: #f2f2f3;
+		padding: 5px 10px;
+		border-radius: 7px;
+		z-index: 75;
 	}
 
 	/* --------------------------------------------
 	   EMPTY STATE
+	   A card with a gold icon tile, per the design.
 	   -------------------------------------------- */
 	.empty-state {
-		@apply text-center py-12 text-secondary-500;
+		@apply flex flex-col items-center text-center gap-2 rounded-2xl shadow-sm;
+		padding: 64px 24px;
+		background: var(--color-bg);
+		border: 1px solid var(--color-divider);
 	}
 
 	.empty-state-icon {
-		@apply text-5xl mb-4;
+		@apply w-14 h-14 grid place-items-center mb-1.5;
+		border-radius: var(--radius-2xl);
+		background: var(--color-accent-100);
+		color: var(--color-accent-800);
 	}
 
 	.empty-state-title {
-		@apply text-lg font-medium;
+		@apply text-xl;
+		font-family: var(--font-heading);
+		font-weight: var(--font-heading-weight);
 	}
 
 	.empty-state-text {
-		@apply text-sm mt-2;
+		@apply text-sm mb-2;
+		max-width: 42ch;
+		color: var(--color-text-60);
 	}
 
 	/* --------------------------------------------
@@ -396,21 +788,64 @@
 	   Tab navigation for filtering
 	   -------------------------------------------- */
 	.tabs {
-		@apply flex items-center gap-1 border-b border-secondary-200 pb-0;
+		@apply flex items-center gap-1 pb-0;
+		border-bottom: 1px solid var(--color-divider);
 	}
 
 	.tab {
-		@apply px-4 py-3 text-sm font-medium text-secondary-500 
-		       hover:text-secondary-700 transition-colors
+		@apply px-4 py-3 text-sm font-medium transition-colors
 		       border-b-2 border-transparent -mb-px;
+		color: var(--color-text-55);
+	}
+
+	.tab:hover {
+		color: var(--color-text);
 	}
 
 	.tab-active {
-		@apply text-secondary-900 border-primary-500;
+		color: var(--color-text);
+		border-bottom-color: var(--color-accent-600);
 	}
 
 	.tab-count {
-		@apply ml-1.5 px-1.5 py-0.5 text-xs rounded-full bg-secondary-100 text-secondary-600;
+		@apply ml-1.5 px-1.5 py-0.5 text-xs rounded-full;
+		background: var(--color-surface);
+		color: var(--color-text-60);
+	}
+
+	/* --------------------------------------------
+	   PILL TABS
+	   Rounded tab set used by the aseguradora form/ficha.
+	   -------------------------------------------- */
+	.pill-tabs {
+		@apply flex flex-wrap gap-2;
+	}
+
+	.pill-tab {
+		@apply inline-flex items-center gap-2 rounded-full cursor-pointer transition-colors;
+		padding: 7px 15px;
+		font-size: 13.5px;
+		font-weight: 500;
+		background: var(--color-bg);
+		color: var(--color-text);
+		border: 1px solid var(--color-divider);
+	}
+
+	.pill-tab:hover {
+		background: var(--color-accent-100);
+		border-color: var(--color-accent-300);
+	}
+
+	.pill-tab-active,
+	.pill-tab-active:hover {
+		background: var(--color-accent);
+		border-color: var(--color-accent);
+		color: var(--color-accent-ink);
+	}
+
+	.pill-tab-count {
+		@apply text-xs;
+		opacity: 0.7;
 	}
 
 	/* --------------------------------------------
@@ -426,11 +861,12 @@
 	}
 
 	.data-table thead {
-		@apply border-b border-secondary-200;
+		border-bottom: 1px solid var(--color-divider);
 	}
 
 	.data-table-header-cell {
-		@apply px-4 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider;
+		@apply px-4 py-3 text-left text-xs font-medium uppercase tracking-wider;
+		color: var(--color-text-55);
 	}
 
 	.data-table-checkbox-cell {
@@ -448,11 +884,16 @@
 	}
 
 	.data-table-row {
-		@apply border-b border-secondary-100 hover:bg-secondary-50/50 transition-colors cursor-pointer;
+		@apply transition-colors cursor-pointer;
+		border-bottom: 1px solid color-mix(in srgb, var(--color-text) 8%, transparent);
+	}
+
+	.data-table-row:hover {
+		background: color-mix(in srgb, var(--color-text) 4%, transparent);
 	}
 
 	.data-table-cell {
-		@apply px-4 py-4 text-secondary-700;
+		@apply px-4 py-4;
 	}
 
 	.data-table-actions {
@@ -470,15 +911,18 @@
 
 	/* Special cell styles */
 	.data-table-id {
-		@apply text-primary-600 font-medium;
+		@apply font-medium;
+		/* The design uses accent-700 here; our gold is lighter, so 700 reaches
+		   only ~3.4:1 and 800 only 4.28:1 on this surface. */
+		color: var(--color-accent-900);
 	}
 
 	.data-table-date {
-		@apply text-secondary-600;
+		color: var(--color-text-60);
 	}
 
 	.data-table-currency {
-		@apply font-medium text-secondary-900;
+		@apply font-medium;
 	}
 
 	/* --------------------------------------------
@@ -515,17 +959,501 @@
 	   Accordion for copropiedad configuration
 	   -------------------------------------------- */
 	.cop-subsection {
-		@apply border border-secondary-200 rounded-lg mb-2 overflow-hidden;
+		@apply rounded-lg mb-2 overflow-hidden;
+		border: 1px solid var(--color-divider);
 	}
 
 	.cop-subsection-header {
-		@apply w-full flex items-center justify-between px-4 py-3 bg-secondary-50 
-		       text-left text-sm font-medium text-secondary-700 
+		@apply w-full flex items-center justify-between px-4 py-3
+		       text-left text-sm font-medium
 		       hover:bg-secondary-100 transition-colors;
+		background: var(--color-surface);
 	}
 
 	.cop-subsection-content {
-		@apply px-4 py-4 space-y-4 bg-white border-t border-secondary-200;
+		@apply px-4 py-4 space-y-4;
+		background: var(--color-bg);
+		border-top: 1px solid var(--color-divider);
+	}
+
+	/* --------------------------------------------
+	   TAGS
+	   The design's four-state vocabulary. `accent` = active/positive,
+	   `accent-2` = pending/informational, `neutral` = inert,
+	   `outline` = terminal/negative.
+	   -------------------------------------------- */
+	.tag {
+		@apply inline-flex items-center rounded-full text-xs whitespace-nowrap;
+		letter-spacing: 0.02em;
+		padding: 3px 10px;
+	}
+
+	.tag-accent {
+		background: var(--color-accent-100);
+		/* accent-900, not the design's 800: our gold ramp is lighter. */
+		color: var(--color-accent-900);
+	}
+
+	.tag-accent-2 {
+		background: var(--color-accent-2-100);
+		color: var(--color-accent-2-800);
+	}
+
+	.tag-neutral {
+		background: var(--color-surface);
+		color: var(--color-text-60);
+	}
+
+	.tag-outline {
+		border: 1px solid var(--color-accent-600);
+		color: var(--color-accent-900);
+	}
+
+	/* --------------------------------------------
+	   PAGE SHELL
+	   Topbar + in-content page header, per the design.
+	   -------------------------------------------- */
+	.topbar {
+		@apply sticky top-0 flex items-center gap-2.5 flex-none;
+		height: var(--topbar-height);
+		padding: 0 24px;
+		background: var(--color-bg);
+		border-bottom: 1px solid var(--color-divider);
+		z-index: 30;
+	}
+
+	.page-shell {
+		@apply flex-1 min-w-0;
+		padding: 24px 24px 40px;
+	}
+
+	.page-header-block {
+		@apply flex items-end justify-between gap-3.5 flex-wrap mb-4;
+	}
+
+	.page-crumb {
+		@apply text-xs mb-0.5;
+		color: var(--color-text-45);
+	}
+
+	.page-header-title {
+		@apply text-3xl mb-0.5;
+		font-family: var(--font-heading);
+		font-weight: var(--font-heading-weight);
+	}
+
+	.page-subtitle {
+		@apply text-sm;
+		color: var(--color-text-60);
+	}
+
+	@media (max-width: 767px) {
+		.topbar {
+			padding: 0 14px;
+		}
+
+		.page-shell {
+			padding: 18px 14px 32px;
+		}
+	}
+
+	/* --------------------------------------------
+	   FILTER BAR
+	   -------------------------------------------- */
+	.filter-bar {
+		@apply flex flex-wrap gap-2.5 items-center rounded-2xl shadow-sm mb-3.5;
+		padding: 13px;
+		background: var(--color-bg);
+		border: 1px solid var(--color-divider);
+	}
+
+	/* --------------------------------------------
+	   KPI CARDS
+	   -------------------------------------------- */
+	.kpi-row {
+		@apply grid gap-3 mb-3.5;
+		grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+	}
+
+	.kpi-card {
+		@apply rounded-2xl shadow-sm;
+		padding: 14px 16px;
+		background: var(--color-bg);
+		border: 1px solid var(--color-divider);
+	}
+
+	.kpi-label {
+		@apply text-xs;
+		color: var(--color-text-60);
+	}
+
+	.kpi-value {
+		@apply text-3xl mt-1;
+		font-family: var(--font-heading);
+		font-weight: var(--font-heading-weight);
+		line-height: 1.1;
+	}
+
+	.kpi-note {
+		@apply text-xs;
+		color: var(--color-text-45);
+	}
+
+	/* --------------------------------------------
+	   BARRA DE PASOS
+	   Recorrido datos → cotizaciones → propuesta → entrega. Sólo pinta lo que
+	   flujoPoliza() deriva; no decide nada por su cuenta.
+	   -------------------------------------------- */
+	.flujo {
+		@apply flex items-center gap-1 flex-wrap rounded-2xl shadow-sm mb-3.5;
+		padding: 10px 14px;
+		background: var(--color-bg);
+		border: 1px solid var(--color-divider);
+	}
+
+	.flujo-paso {
+		@apply inline-flex items-center gap-2 rounded-full text-sm transition-colors;
+		padding: 6px 12px;
+		color: var(--color-text-60);
+	}
+
+	a.flujo-paso:hover {
+		background: var(--color-accent-100);
+	}
+
+	.flujo-paso-done {
+		color: var(--color-accent-900);
+		font-weight: 500;
+	}
+
+	.flujo-paso-current {
+		background: var(--color-accent-100);
+		color: var(--color-accent-900);
+		font-weight: 600;
+		box-shadow: inset 0 0 0 1px var(--color-accent-400);
+	}
+
+	.flujo-paso-blocked {
+		color: var(--color-text-45);
+		cursor: not-allowed;
+	}
+
+	/* Marcador: número mientras está pendiente, check una vez cumplido. */
+	.flujo-marca {
+		@apply grid place-items-center flex-none rounded-full text-xs font-semibold;
+		width: 20px;
+		height: 20px;
+		background: var(--color-surface);
+		color: var(--color-text-60);
+	}
+
+	.flujo-paso-done .flujo-marca {
+		background: var(--color-accent-600);
+		color: var(--color-accent-ink);
+	}
+
+	.flujo-sep {
+		@apply flex-none;
+		width: 16px;
+		height: 1px;
+		background: var(--color-divider);
+	}
+
+	.flujo-terminal {
+		@apply text-sm ml-auto;
+		color: var(--color-text-60);
+	}
+
+	/* --------------------------------------------
+	   SCROLLABLE QUEUE
+	   A work list that scrolls inside its own panel, so a long queue stays fully
+	   reachable without stretching the page. The height is set to cut a row in
+	   half, which is what tells the reader there is more below.
+	   -------------------------------------------- */
+	.scroll-list {
+		@apply overflow-y-auto pr-1;
+		/* ~5.5 rows at 54px (row + gap), so the cut lands mid-row. */
+		max-height: var(--queue-max-h, 290px);
+		/* Don't hand the scroll back to the page when the list bottoms out. */
+		overscroll-behavior: contain;
+		scrollbar-width: thin;
+		scrollbar-color: var(--color-accent-300) transparent;
+	}
+
+	.scroll-list::-webkit-scrollbar {
+		width: 8px;
+	}
+
+	.scroll-list::-webkit-scrollbar-track {
+		background: transparent;
+	}
+
+	.scroll-list::-webkit-scrollbar-thumb {
+		background: var(--color-accent-300);
+		border-radius: 999px;
+		/* Inset by the card colour so the thumb reads as 4px, not a slab. */
+		border: 2px solid var(--color-bg);
+	}
+
+	.scroll-list::-webkit-scrollbar-thumb:hover {
+		background: var(--color-accent-400);
+	}
+
+	/* --------------------------------------------
+	   ACTION STRIP
+	   Primary entry points, sitting directly on the page surface rather than
+	   inside a panel: as a panel they read as one more block of content to scan
+	   past, which is exactly how they get lost.
+	   -------------------------------------------- */
+	.action-strip {
+		@apply grid gap-2.5 mb-3.5;
+		grid-template-columns: repeat(auto-fit, minmax(216px, 1fr));
+	}
+
+	.action-tile {
+		@apply flex items-center gap-3 rounded-2xl shadow-sm transition-colors;
+		padding: 13px 15px;
+		background: var(--color-bg);
+		border: 1px solid var(--color-divider);
+		color: inherit;
+	}
+
+	.action-tile:hover {
+		border-color: var(--color-accent-400);
+		background: var(--color-accent-100);
+	}
+
+	.action-tile-icon {
+		@apply grid place-items-center flex-none;
+		width: 38px;
+		height: 38px;
+		border-radius: var(--radius-lg);
+		background: var(--color-accent-200);
+		color: var(--color-accent-900);
+	}
+
+	.action-tile-label {
+		@apply block text-sm font-semibold;
+	}
+
+	.action-tile-desc {
+		@apply block text-xs;
+		color: var(--color-text-55);
+	}
+
+	/* --------------------------------------------
+	   BAR MARKS
+	   Thin horizontal magnitude bars: 8px, square at the baseline (left) and a
+	   4px rounded data-end. The track is a lighter step of the same ramp so the
+	   remaining scale reads as part of the same object.
+	   -------------------------------------------- */
+	.bar-track {
+		@apply w-full overflow-hidden;
+		height: 8px;
+		border-radius: 0 4px 4px 0;
+		background: var(--color-accent-100);
+	}
+
+	.bar-fill {
+		@apply h-full;
+		border-radius: 0 4px 4px 0;
+		/* Highest-chroma step that clears the lightness band; every row is
+		   directly labelled, which is what licenses its 2.88:1 against the card. */
+		background: var(--color-accent-700);
+	}
+
+	/* --------------------------------------------
+	   LIST ROW CARD
+	   The design's list primitive: header line (lead tile, title, tags,
+	   actions) over an auto-fit metadata grid.
+	   -------------------------------------------- */
+	.row-card {
+		@apply flex flex-col gap-3 rounded-2xl shadow-sm transition-colors;
+		padding: 15px 16px;
+		background: var(--color-bg);
+		border: 1px solid var(--color-divider);
+	}
+
+	.row-card:hover {
+		border-color: var(--color-accent-400);
+	}
+
+	.row-card-head {
+		@apply flex items-center gap-2.5 flex-wrap;
+	}
+
+	.row-card-title {
+		@apply font-semibold;
+		font-size: 15.5px;
+	}
+
+	/* Title rendered as a navigation button/link. */
+	.row-card-link {
+		@apply font-semibold cursor-pointer bg-transparent border-0 p-0 text-left;
+		font-size: 15.5px;
+		/* accent-900, not 800: on the card background 800 measures 4.28:1,
+		   just under the 4.5:1 minimum for text this size. */
+		color: var(--color-accent-900);
+	}
+
+	.row-card-link:hover {
+		color: var(--color-accent-ink);
+		text-decoration: underline;
+	}
+
+	.row-card-actions {
+		@apply flex gap-1.5;
+		margin-left: auto;
+	}
+
+	.row-list {
+		@apply flex flex-col gap-2.5;
+	}
+
+	/* Lead tile: circular for people, rounded square for entities/documents. */
+	.avatar {
+		@apply grid place-items-center flex-none font-semibold;
+		width: 38px;
+		height: 38px;
+		font-size: 13px;
+		background: var(--color-accent-200);
+		color: var(--color-accent-900);
+	}
+
+	.avatar-circle {
+		border-radius: 50%;
+	}
+
+	.avatar-square {
+		border-radius: var(--radius-lg);
+		font-size: 11px;
+	}
+
+	.avatar-strong {
+		/* accent-900, not 800: the initials are text, and #f2f2f3 on 800 reaches
+		   only 4.28:1. */
+		background: var(--color-accent-900);
+		color: #f2f2f3;
+		font-family: var(--font-heading);
+		font-weight: var(--font-heading-weight);
+		font-size: 14px;
+	}
+
+	/* --------------------------------------------
+	   DETAIL LAYOUT
+	   -------------------------------------------- */
+	.detail-grid {
+		@apply grid gap-3.5 items-start;
+		grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr);
+	}
+
+	@media (max-width: 1099px) {
+		.detail-grid {
+			grid-template-columns: 1fr;
+		}
+	}
+
+	.detail-metric {
+		@apply text-4xl;
+		font-family: var(--font-heading);
+		font-weight: var(--font-heading-weight);
+		line-height: 1.1;
+	}
+
+	/* --------------------------------------------
+	   POPOVER MENU
+	   -------------------------------------------- */
+	.menu-popover {
+		@apply fixed flex flex-col p-1.5 text-left;
+		background: var(--color-bg);
+		border: 1px solid var(--color-divider);
+		border-radius: var(--radius-lg);
+		box-shadow: var(--shadow-lg);
+		z-index: 70;
+	}
+
+	.menu-item {
+		@apply flex items-center gap-2.5 border-0 bg-transparent cursor-pointer text-left
+		       transition-colors rounded-lg;
+		padding: 8px 10px;
+		font-size: 13.5px;
+		color: inherit;
+	}
+
+	.menu-item:hover {
+		background: var(--color-accent-100);
+	}
+
+	.menu-item-danger {
+		color: var(--color-accent-900);
+	}
+
+	.menu-divider {
+		@apply h-px my-1.5;
+		background: var(--color-divider);
+	}
+
+	/* --------------------------------------------
+	   SEGMENTED CONTROL
+	   -------------------------------------------- */
+	.seg {
+		@apply inline-flex overflow-hidden;
+		border: 1px solid var(--color-divider);
+		border-radius: var(--radius-md);
+	}
+
+	.seg-opt {
+		@apply inline-flex items-center justify-center gap-1.5 cursor-pointer transition-colors;
+		padding: 7px 12px;
+		font-size: 13px;
+	}
+
+	.seg-opt + .seg-opt {
+		border-left: 1px solid var(--color-divider);
+	}
+
+	.seg-opt:has(input:checked) {
+		background: var(--color-accent);
+		color: var(--color-accent-ink);
+		font-weight: 500;
+	}
+
+	.seg-opt:not(:has(input:checked)):hover {
+		background: var(--color-accent-100);
+	}
+
+	/* --------------------------------------------
+	   SKELETON
+	   -------------------------------------------- */
+	.sk-row {
+		@apply flex gap-3.5 items-center rounded-2xl;
+		padding: 16px;
+		background: var(--color-bg);
+		border: 1px solid var(--color-divider);
+	}
+
+	.sk-bar {
+		@apply block;
+		background: color-mix(in srgb, var(--color-text) 12%, transparent);
+		animation: sk 1.2s ease-in-out infinite;
+	}
+}
+
+@keyframes sk {
+	0% {
+		opacity: 0.3;
+	}
+	50% {
+		opacity: 0.8;
+	}
+	100% {
+		opacity: 0.3;
+	}
+}
+
+@keyframes spin {
+	to {
+		transform: rotate(360deg);
 	}
 }
 

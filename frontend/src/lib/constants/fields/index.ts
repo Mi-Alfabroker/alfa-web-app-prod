@@ -4,5 +4,6 @@
  */
 
 export * from './aseguradora.fields';
+export * from './aseguradora.rubros';
 export * from './cliente.fields';
 export * from './bien.fields';
