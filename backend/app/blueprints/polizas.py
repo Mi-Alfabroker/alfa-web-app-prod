@@ -1183,3 +1183,131 @@ def get_polizas_por_vencer():
         },
         'dias_consultados': dias
     }), 200
+
+
+@polizas_bp.route('/hogar/<int:poliza_id>/marcar-documento', methods=['PATCH', 'OPTIONS'])
+def marcar_documento_poliza_hogar(poliza_id: int):
+    """
+    Record that a document (proposal or delivery) was generated for this policy.
+
+    Expected JSON body:
+        - documento (required): 'propuesta' or 'entrega'
+    """
+    data = request.get_json()
+
+    if not data or 'documento' not in data:
+        return jsonify({
+            'success': False,
+            'error': 'Field documento is required'
+        }), 400
+
+    poliza, error = PolizaHogarService.marcar_documento(poliza_id, data['documento'])
+
+    if error:
+        status_code = 404 if 'not found' in error.lower() else 400
+        return jsonify({
+            'success': False,
+            'error': error
+        }), status_code
+
+    return jsonify({
+        'success': True,
+        'data': poliza,
+        'message': f'Documento {data["documento"]} marcado como generado'
+    }), 200
+
+
+@polizas_bp.route('/vehiculo/<int:poliza_id>/marcar-documento', methods=['PATCH', 'OPTIONS'])
+def marcar_documento_poliza_vehiculo(poliza_id: int):
+    """
+    Record that a document (proposal or delivery) was generated for this policy.
+
+    Expected JSON body:
+        - documento (required): 'propuesta' or 'entrega'
+    """
+    data = request.get_json()
+
+    if not data or 'documento' not in data:
+        return jsonify({
+            'success': False,
+            'error': 'Field documento is required'
+        }), 400
+
+    poliza, error = PolizaVehiculoService.marcar_documento(poliza_id, data['documento'])
+
+    if error:
+        status_code = 404 if 'not found' in error.lower() else 400
+        return jsonify({
+            'success': False,
+            'error': error
+        }), status_code
+
+    return jsonify({
+        'success': True,
+        'data': poliza,
+        'message': f'Documento {data["documento"]} marcado como generado'
+    }), 200
+
+
+@polizas_bp.route('/copropiedad/<int:poliza_id>/marcar-documento', methods=['PATCH', 'OPTIONS'])
+def marcar_documento_poliza_copropiedad(poliza_id: int):
+    """
+    Record that a document (proposal or delivery) was generated for this policy.
+
+    Expected JSON body:
+        - documento (required): 'propuesta' or 'entrega'
+    """
+    data = request.get_json()
+
+    if not data or 'documento' not in data:
+        return jsonify({
+            'success': False,
+            'error': 'Field documento is required'
+        }), 400
+
+    poliza, error = PolizaCopropiedadService.marcar_documento(poliza_id, data['documento'])
+
+    if error:
+        status_code = 404 if 'not found' in error.lower() else 400
+        return jsonify({
+            'success': False,
+            'error': error
+        }), status_code
+
+    return jsonify({
+        'success': True,
+        'data': poliza,
+        'message': f'Documento {data["documento"]} marcado como generado'
+    }), 200
+
+
+@polizas_bp.route('/otro-bien/<int:poliza_id>/marcar-documento', methods=['PATCH', 'OPTIONS'])
+def marcar_documento_poliza_otro_bien(poliza_id: int):
+    """
+    Record that a document (proposal or delivery) was generated for this policy.
+
+    Expected JSON body:
+        - documento (required): 'propuesta' or 'entrega'
+    """
+    data = request.get_json()
+
+    if not data or 'documento' not in data:
+        return jsonify({
+            'success': False,
+            'error': 'Field documento is required'
+        }), 400
+
+    poliza, error = PolizaOtroBienService.marcar_documento(poliza_id, data['documento'])
+
+    if error:
+        status_code = 404 if 'not found' in error.lower() else 400
+        return jsonify({
+            'success': False,
+            'error': error
+        }), status_code
+
+    return jsonify({
+        'success': True,
+        'data': poliza,
+        'message': f'Documento {data["documento"]} marcado como generado'
+    }), 200

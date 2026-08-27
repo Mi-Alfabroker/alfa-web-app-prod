@@ -97,6 +97,12 @@ class BasePolizaMixin:
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
+    # Generated-document markers. NULL means the document was never produced.
+    # These drive the proposal -> delivery step order in the UI; the policy
+    # state enum stays untouched.
+    propuesta_generada_at = db.Column(db.DateTime(timezone=True))
+    entrega_generada_at = db.Column(db.DateTime(timezone=True))
+
     @staticmethod
     def generar_consecutivo(bien_id: int, cliente_id: int, fecha: Optional[date] = None) -> str:
         """
@@ -185,6 +191,8 @@ class BasePolizaMixin:
             'valor_cuota_11': self.valor_cuota_11,
             'created_at': self.created_at.isoformat() if self.created_at else None,
             'updated_at': self.updated_at.isoformat() if self.updated_at else None,
+            'propuesta_generada_at': self.propuesta_generada_at.isoformat() if self.propuesta_generada_at else None,
+            'entrega_generada_at': self.entrega_generada_at.isoformat() if self.entrega_generada_at else None,
         }
 
     @staticmethod
