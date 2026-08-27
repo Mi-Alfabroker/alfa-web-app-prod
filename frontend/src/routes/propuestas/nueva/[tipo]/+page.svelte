@@ -3,7 +3,7 @@
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 	import { APP_NAME } from '$lib/config';
-	import { FormSection, FormField, Input, Select, Modal, CurrencyInput } from '$components';
+	import { CurrencyInput, FormField, FormSection, Input, Modal, PageHeader, Select } from '$components';
 	import { polizaService, clienteService, bienService, aseguradoraService } from '$services';
 	import { addNotification } from '$lib/stores/notifications';
 	import type { Cliente } from '$lib/types/cliente';
@@ -317,19 +317,15 @@
 </svelte:head>
 
 <!-- Header -->
-<header class="page-header">
-	<div class="flex items-center gap-4">
-		<a href="/propuestas" class="page-back-link">
-			<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-				<path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
-			</svg>
-			<span>Volver a Pólizas</span>
-		</a>
-	</div>
-</header>
+<div class="page-shell">
+	<PageHeader
+		title="Nueva propuesta {tipoLabel}"
+		crumb="Inicio / Operación / Pólizas"
+		subtitle="Selecciona el cliente y el bien, y registra hasta cinco cotizaciones"
+		backHref="/propuestas"
+		backLabel="Volver a pólizas"
+	/>
 
-<!-- Content -->
-<div class="page-content">
 	{#if loading}
 		<div class="flex items-center justify-center py-12">
 			<div class="flex flex-col items-center gap-4">
@@ -343,12 +339,8 @@
 	{:else}
 		<div class="max-w-4xl mx-auto">
 			<form class="form-container" on:submit|preventDefault={handleSubmit}>
-				<div class="flex items-center gap-3 mb-6">
-					<span class="text-3xl">
-						{tipoBien === 'HOGAR' ? '🏠' : tipoBien === 'VEHICULO' ? '🚗' : tipoBien === 'COPROPIEDAD' ? '🏢' : '📦'}
-					</span>
-					<h1 class="form-title mb-0">Nueva Propuesta de {tipoLabel}</h1>
-				</div>
+				<!-- El encabezado de la página ya nombra la pantalla; repetirlo aquí
+				     con un emoji duplicaba el título y rompía el sistema de íconos. -->
 
 				<!-- Section: Selección de Bien -->
 				<FormSection 
@@ -452,13 +444,16 @@
 					title="Opciones de Aseguradoras" 
 					bind:open={sections.aseguradoras}
 				>
-					<p class="text-sm text-secondary-500 mb-4">
-						Puedes agregar hasta 5 opciones de aseguradoras con sus respectivos valores de prima.
+					<p class="form-section-note">
+						Registra hasta cinco cotizaciones. Al emitir la póliza eliges cuál se aplica.
 					</p>
 
+					<!-- Las cinco opciones son una rejilla propia: como hermanas sueltas
+					     cada una ocupaba la fila completa de la sección. -->
+					<div class="quote-grid">
 					<!-- Opción 1 -->
-					<div class="p-4 bg-secondary-50 rounded-lg mb-3 space-y-4">
-						<p class="text-sm font-medium text-secondary-700">Opción 1</p>
+					<div class="quote-card">
+						<p class="quote-card-title">Opción 1</p>
 						<FormField label="Aseguradora">
 							<Select 
 								bind:value={formData.id_aseguradora_1}
@@ -475,8 +470,8 @@
 					</div>
 
 					<!-- Opción 2 -->
-					<div class="p-4 bg-secondary-50 rounded-lg mb-3 space-y-4">
-						<p class="text-sm font-medium text-secondary-700">Opción 2</p>
+					<div class="quote-card">
+						<p class="quote-card-title">Opción 2</p>
 						<FormField label="Aseguradora">
 							<Select 
 								bind:value={formData.id_aseguradora_2}
@@ -493,8 +488,8 @@
 					</div>
 
 					<!-- Opción 3 -->
-					<div class="p-4 bg-secondary-50 rounded-lg mb-3 space-y-4">
-						<p class="text-sm font-medium text-secondary-700">Opción 3</p>
+					<div class="quote-card">
+						<p class="quote-card-title">Opción 3</p>
 						<FormField label="Aseguradora">
 							<Select 
 								bind:value={formData.id_aseguradora_3}
@@ -511,8 +506,8 @@
 					</div>
 
 					<!-- Opción 4 -->
-					<div class="p-4 bg-secondary-50 rounded-lg mb-3 space-y-4">
-						<p class="text-sm font-medium text-secondary-700">Opción 4</p>
+					<div class="quote-card">
+						<p class="quote-card-title">Opción 4</p>
 						<FormField label="Aseguradora">
 							<Select 
 								bind:value={formData.id_aseguradora_4}
@@ -529,8 +524,8 @@
 					</div>
 
 					<!-- Opción 5 -->
-					<div class="p-4 bg-secondary-50 rounded-lg space-y-4">
-						<p class="text-sm font-medium text-secondary-700">Opción 5</p>
+					<div class="quote-card">
+						<p class="quote-card-title">Opción 5</p>
 						<FormField label="Aseguradora">
 							<Select 
 								bind:value={formData.id_aseguradora_5}
@@ -545,6 +540,7 @@
 							/>
 						</FormField>
 					</div>
+					</div>
 				</FormSection>
 
 				<!-- Section: Valores Asegurados -->
@@ -553,7 +549,7 @@
 					bind:open={sections.valores}
 				>
 					{#if tipoBien === 'HOGAR'}
-						<div class="space-y-4">
+						<div class="field-pairs">
 							<FormField label="Valor Inmueble Asegurado">
 								<CurrencyInput 
 									bind:value={formData.valor_inmueble_asegurado}
@@ -586,7 +582,7 @@
 							</FormField>
 						</div>
 					{:else if tipoBien === 'VEHICULO'}
-						<div class="space-y-4">
+						<div class="field-pairs">
 							<FormField label="Valor Vehículo Asegurado">
 								<CurrencyInput 
 									bind:value={formData.valor_vehiculo_asegurado}
@@ -601,7 +597,7 @@
 							</FormField>
 						</div>
 					{:else if tipoBien === 'COPROPIEDAD'}
-						<div class="space-y-4">
+						<div class="field-pairs">
 							<FormField label="Valor Área Común Asegurado">
 								<CurrencyInput 
 									bind:value={formData.valor_area_comun_asegurado}
@@ -628,7 +624,7 @@
 							</FormField>
 						</div>
 					{:else}
-						<FormField label="Valor del Bien Asegurado">
+						<FormField label="Valor del Bien Asegurado" wide>
 							<CurrencyInput 
 								bind:value={formData.valor_bien_asegurado}
 								placeholder="0"
@@ -645,7 +641,7 @@
 					<p class="text-sm text-secondary-500 mb-4">
 						Estos valores se llenan cuando la propuesta cambie a estado VIGENTE.
 					</p>
-					<div class="space-y-4">
+					<div class="field-pairs">
 						<FormField label="Prima Neta">
 							<CurrencyInput 
 								bind:value={formData.valor_prima_neta}

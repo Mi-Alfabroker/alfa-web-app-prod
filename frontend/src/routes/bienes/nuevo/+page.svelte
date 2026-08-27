@@ -3,7 +3,7 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { APP_NAME } from '$lib/config';
-	import { FormSection, FormField, Input, Select, CurrencyInput } from '$components';
+	import { CurrencyInput, FormField, FormSection, Input, PageHeader, Select } from '$components';
 	import { bienService, clienteService } from '$services';
 	import { HogarFields, VehiculoFields, CopropiedadFields, OtroBienFields } from '$constants';
 	import type { Cliente } from '$lib/types/cliente';
@@ -183,23 +183,17 @@
 </svelte:head>
 
 <!-- Header -->
-<header class="page-header">
-	<div class="flex items-center gap-4">
-		<a href="/bienes" class="page-back-link">
-			<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-				<path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
-			</svg>
-			<span>Volver</span>
-		</a>
-	</div>
-</header>
+<div class="page-shell">
+	<PageHeader
+		title="Registrar nuevo bien"
+		crumb="Inicio / Operación / Bienes"
+		backHref="/bienes"
+		backLabel="Volver a bienes"
+	/>
 
-<!-- Content -->
-<div class="page-content">
 	<div class="max-w-4xl mx-auto">
 		<form class="form-container" on:submit|preventDefault={handleSubmit}>
 			<!-- Form Title -->
-			<h1 class="form-title">Registrar Nuevo Bien</h1>
 
 			<!-- Error Message -->
 			{#if error}
@@ -281,7 +275,7 @@
 				>
 					<!-- HOGAR FORM -->
 					{#if tipoBien === 'HOGAR'}
-						<div class="space-y-4">
+						<div class="field-pairs">
 							<FormField label={HogarFields.tipo_inmueble.label} required>
 								<Select 
 									bind:value={hogarForm.tipo_inmueble}
@@ -298,7 +292,7 @@
 									disabled={loading}
 								/>
 							</FormField>
-							<FormField label={HogarFields.direccion_inmueble.label}>
+							<FormField label={HogarFields.direccion_inmueble.label} wide>
 								<Input 
 									bind:value={hogarForm.direccion_inmueble}
 									placeholder="Ej: Calle 123 #45-67"
@@ -328,7 +322,7 @@
 
 					<!-- VEHICULO FORM -->
 					{:else if tipoBien === 'VEHICULO'}
-						<div class="space-y-4">
+						<div class="field-pairs">
 							<FormField label={VehiculoFields.tipo_vehiculo.label} required>
 								<Select 
 									bind:value={vehiculoForm.tipo_vehiculo}
@@ -391,7 +385,7 @@
 
 					<!-- COPROPIEDAD FORM -->
 					{:else if tipoBien === 'COPROPIEDAD'}
-						<div class="space-y-4">
+						<div class="field-pairs">
 							<FormField label={CopropiedadFields.tipo_copropiedad.label} required>
 								<Select 
 									bind:value={copropiedadForm.tipo_copropiedad}
@@ -416,7 +410,7 @@
 									disabled={loading}
 								/>
 							</FormField>
-							<FormField label={CopropiedadFields.direccion.label}>
+							<FormField label={CopropiedadFields.direccion.label} wide>
 								<Input 
 									bind:value={copropiedadForm.direccion}
 									placeholder="Ej: Carrera 10 #20-30"
@@ -436,7 +430,7 @@
 						</div>
 						<div class="border-t pt-4 mt-4">
 							<h4 class="text-sm font-semibold text-secondary-700 mb-4">Estructura del Edificio</h4>
-							<div class="space-y-4">
+							<div class="field-pairs">
 								<FormField label={CopropiedadFields.numero_torres.label}>
 									<Input 
 										type="number"
@@ -468,7 +462,7 @@
 						</div>
 						<div class="border-t pt-4 mt-4">
 							<h4 class="text-sm font-semibold text-secondary-700 mb-4">Cantidad de Unidades</h4>
-							<div class="space-y-4">
+							<div class="field-pairs">
 								<FormField label={CopropiedadFields.cantidad_unidades_casa.label}>
 									<Input 
 										type="number"
@@ -519,7 +513,7 @@
 
 					<!-- OTRO BIEN FORM -->
 					{:else if tipoBien === 'OTRO'}
-						<div class="space-y-4">
+						<div class="field-pairs">
 							<FormField label={OtroBienFields.tipo_seguro.label} required>
 								<Input 
 									bind:value={otroBienForm.tipo_seguro}
@@ -528,7 +522,7 @@
 									disabled={loading}
 								/>
 							</FormField>
-							<FormField label={OtroBienFields.bien_asegurado.label} required>
+							<FormField label={OtroBienFields.bien_asegurado.label} required wide>
 								<Input 
 									bind:value={otroBienForm.bien_asegurado}
 									placeholder="Ej: Equipo de Fotografía Profesional"
@@ -536,7 +530,7 @@
 									disabled={loading}
 								/>
 							</FormField>
-							<FormField label={OtroBienFields.detalles_bien_asegurado.label} helper="Información adicional sobre el bien.">
+							<FormField label={OtroBienFields.detalles_bien_asegurado.label} helper="Información adicional sobre el bien." wide>
 								<textarea
 									bind:value={otroBienForm.detalles_bien_asegurado}
 									placeholder="Describa los detalles del bien a asegurar..."
@@ -554,7 +548,7 @@
 					bind:open={sections.valores.open}
 				>
 					{#if tipoBien === 'HOGAR'}
-						<div class="space-y-4">
+						<div class="field-pairs">
 							<FormField label={HogarFields.valor_inmueble_avaluo.label} helper="Valor comercial del inmueble.">
 								<CurrencyInput 
 									bind:value={hogarForm.valor_inmueble_avaluo}
@@ -592,7 +586,7 @@
 							</FormField>
 						</div>
 					{:else if tipoBien === 'VEHICULO'}
-						<div class="space-y-4">
+						<div class="field-pairs">
 							<FormField label={VehiculoFields.valor_vehiculo.label} helper="Valor comercial del vehículo.">
 								<CurrencyInput 
 									bind:value={vehiculoForm.valor_vehiculo}
@@ -609,7 +603,7 @@
 							</FormField>
 						</div>
 					{:else if tipoBien === 'COPROPIEDAD'}
-						<div class="space-y-4">
+						<div class="field-pairs">
 							<FormField label={CopropiedadFields.valor_edificio_area_comun_avaluo.label}>
 								<CurrencyInput 
 									bind:value={copropiedadForm.valor_edificio_area_comun_avaluo}
@@ -647,7 +641,7 @@
 							</FormField>
 						</div>
 					{:else if tipoBien === 'OTRO'}
-						<div class="space-y-4">
+						<div class="field-pairs">
 							<FormField label={OtroBienFields.valor_bien_asegurar.label} helper="Valor comercial del bien.">
 								<CurrencyInput 
 									bind:value={otroBienForm.valor_bien_asegurar}

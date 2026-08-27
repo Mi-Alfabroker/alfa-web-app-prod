@@ -1,7 +1,16 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { APP_NAME } from '$lib/config';
-	import { DataTable, Modal, Tabs } from '$components';
+	import {
+		Avatar,
+		DropdownMenu,
+		EmptyState,
+		ListRowCard,
+		Modal,
+		PageHeader,
+		SkeletonRows,
+		Tag
+	} from '$components';
 	import { goto } from '$app/navigation';
 	import { bienService, clienteService } from '$services';
 	import { HogarFields, VehiculoFields, CopropiedadFields, OtroBienFields } from '$constants';
@@ -39,43 +48,6 @@
 		{ id: 'VEHICULO', label: 'Vehículos', icon: '🚗' },
 		{ id: 'COPROPIEDAD', label: 'Copropiedades', icon: '🏢' },
 		{ id: 'OTRO', label: 'Otros', icon: '📦' }
-	];
-
-	// Column definitions
-	const hogarColumns = [
-		{ key: HogarFields.id.db, label: HogarFields.id.label, sortable: true },
-		{ key: HogarFields.tipo_inmueble.db, label: HogarFields.tipo_inmueble.label, sortable: true },
-		{ key: HogarFields.ciudad_inmueble.db, label: HogarFields.ciudad_inmueble.label, sortable: true },
-		{ key: HogarFields.direccion_inmueble.db, label: HogarFields.direccion_inmueble.label, sortable: false },
-		{ key: HogarFields.valor_inmueble_avaluo.db, label: 'Valor', sortable: true },
-		{ key: 'acciones', label: 'Acciones', sortable: false }
-	];
-
-	const vehiculoColumns = [
-		{ key: VehiculoFields.id.db, label: VehiculoFields.id.label, sortable: true },
-		{ key: VehiculoFields.tipo_vehiculo.db, label: VehiculoFields.tipo_vehiculo.label, sortable: true },
-		{ key: VehiculoFields.placa.db, label: VehiculoFields.placa.label, sortable: true },
-		{ key: VehiculoFields.marca.db, label: VehiculoFields.marca.label, sortable: true },
-		{ key: VehiculoFields.ano_modelo.db, label: VehiculoFields.ano_modelo.label, sortable: true },
-		{ key: VehiculoFields.valor_vehiculo.db, label: 'Valor', sortable: true },
-		{ key: 'acciones', label: 'Acciones', sortable: false }
-	];
-
-	const copropiedadColumns = [
-		{ key: CopropiedadFields.id.db, label: CopropiedadFields.id.label, sortable: true },
-		{ key: CopropiedadFields.tipo_copropiedad.db, label: CopropiedadFields.tipo_copropiedad.label, sortable: true },
-		{ key: CopropiedadFields.ciudad.db, label: CopropiedadFields.ciudad.label, sortable: true },
-		{ key: CopropiedadFields.direccion.db, label: CopropiedadFields.direccion.label, sortable: false },
-		{ key: CopropiedadFields.numero_torres.db, label: 'Torres', sortable: true },
-		{ key: 'acciones', label: 'Acciones', sortable: false }
-	];
-
-	const otroBienColumns = [
-		{ key: OtroBienFields.id.db, label: OtroBienFields.id.label, sortable: true },
-		{ key: OtroBienFields.tipo_seguro.db, label: OtroBienFields.tipo_seguro.label, sortable: true },
-		{ key: OtroBienFields.bien_asegurado.db, label: OtroBienFields.bien_asegurado.label, sortable: true },
-		{ key: OtroBienFields.valor_bien_asegurar.db, label: 'Valor', sortable: true },
-		{ key: 'acciones', label: 'Acciones', sortable: false }
 	];
 
 	// Cargar datos
@@ -224,240 +196,306 @@
 		total: hogares.length + vehiculos.length + copropiedades.length + otrosBienes.length
 	};
 
-	// Datos activos según tab
-	$: activeData = activeTab === 'HOGAR' ? hogares
-		: activeTab === 'VEHICULO' ? vehiculos
-		: activeTab === 'COPROPIEDAD' ? copropiedades
-		: otrosBienes;
-
-	$: activeColumns = activeTab === 'HOGAR' ? hogarColumns
-		: activeTab === 'VEHICULO' ? vehiculoColumns
-		: activeTab === 'COPROPIEDAD' ? copropiedadColumns
-		: otroBienColumns;
-
 	// Helper para cambiar tab (evita casting en template)
 	function setActiveTab(tabId: string) {
 		activeTab = tabId as TipoBien;
 	}
 
+	/**
+	 * Derived rather than called per tab from the template. A template call like
+	 * `getTabCount(tab.id)` only re-evaluates when a name inside that expression
+	 * changes, so a helper reading `counts` internally would stay frozen at the
+	 * zeros it saw before the lists loaded.
+	 */
+	$: tabsWithCounts = tabs.map((tab) => ({
+		...tab,
+		count: counts[tab.id as TipoBien] ?? 0
+	}));
+
 	// Helper para formatear valor numérico
 	function formatValue(value: unknown): string {
 		return formatCurrency(value as number);
 	}
+
+	/**
+	 * Row-card shape per rubro. Each collection has its own columns, so the
+	 * headline, the tag and the metadata grid are chosen per type; the cliente
+	 * is included in all four (the old table did not show the owner at all).
+	 */
+	interface BienRow {
+		id: number;
+		sigla: string;
+		titulo: string;
+		tipo: string;
+		fields: { label: string; value: string; strong?: boolean }[];
+		raw: Record<string, unknown>;
+	}
+
+	function num(value: number | null | undefined): string {
+		return value === null || value === undefined ? '—' : String(value);
+	}
+
+	/**
+	 * Derived rather than called from the template, and every source is named in
+	 * the reactive expression below — including `clientes`, which is only read
+	 * indirectly through `getClienteName`. Left implicit, the owner column would
+	 * keep showing `#id` whenever clientes resolved after the bien lists.
+	 */
+	$: bienRows = buildBienRows(
+		activeTab,
+		hogares,
+		vehiculos,
+		copropiedades,
+		otrosBienes,
+		clientes
+	);
+
+	function buildBienRows(
+		activeTab: TipoBien,
+		hogares: Hogar[],
+		vehiculos: Vehiculo[],
+		copropiedades: Copropiedad[],
+		otrosBienes: OtroBien[],
+		// Named so the reactive statement above depends on it; read via getClienteName.
+		_clientes: Cliente[]
+	): BienRow[] {
+		if (activeTab === 'HOGAR') {
+			return hogares.map((h) => ({
+				id: h.id,
+				sigla: 'HOG',
+				titulo: h.direccion_inmueble || `Hogar #${h.id}`,
+				tipo: h.tipo_inmueble || 'Hogar',
+				raw: h as unknown as Record<string, unknown>,
+				fields: [
+					{ label: 'Cliente', value: getClienteName(h.id_usuario), strong: true },
+					{ label: HogarFields.ciudad_inmueble.label, value: displayValue(h.ciudad_inmueble) },
+					{ label: 'Valor avalúo', value: formatValue(h.valor_inmueble_avaluo), strong: true },
+					{ label: HogarFields.numero_pisos.label, value: num(h.numero_pisos) },
+					{ label: HogarFields.ano_construccion.label, value: num(h.ano_construccion) }
+				]
+			}));
+		}
+		if (activeTab === 'VEHICULO') {
+			return vehiculos.map((v) => ({
+				id: v.id,
+				sigla: 'AUT',
+				titulo: v.placa || `Vehículo #${v.id}`,
+				tipo: v.tipo_vehiculo || 'Vehículo',
+				raw: v as unknown as Record<string, unknown>,
+				fields: [
+					{ label: 'Cliente', value: getClienteName(v.id_usuario), strong: true },
+					{ label: VehiculoFields.marca.label, value: displayValue(v.marca) },
+					{ label: VehiculoFields.ano_modelo.label, value: num(v.ano_modelo) },
+					{ label: VehiculoFields.serie_referencia.label, value: displayValue(v.serie_referencia) },
+					{ label: 'Valor vehículo', value: formatValue(v.valor_vehiculo), strong: true },
+					{ label: VehiculoFields.codigo_fasecolda.label, value: displayValue(v.codigo_fasecolda) }
+				]
+			}));
+		}
+		if (activeTab === 'COPROPIEDAD') {
+			return copropiedades.map((c) => ({
+				id: c.id,
+				sigla: 'COP',
+				titulo: c.direccion || `Copropiedad #${c.id}`,
+				tipo: c.tipo_copropiedad || 'Copropiedad',
+				raw: c as unknown as Record<string, unknown>,
+				fields: [
+					{ label: 'Cliente', value: getClienteName(c.id_usuario), strong: true },
+					{ label: CopropiedadFields.ciudad.label, value: displayValue(c.ciudad) },
+					{ label: CopropiedadFields.estrato.label, value: num(c.estrato) },
+					{ label: 'Torres', value: num(c.numero_torres) },
+					{
+						label: 'Valor área común',
+						value: formatValue(c.valor_edificio_area_comun_avaluo),
+						strong: true
+					},
+					{ label: CopropiedadFields.ano_construccion.label, value: num(c.ano_construccion) }
+				]
+			}));
+		}
+		return otrosBienes.map((o) => ({
+			id: o.id,
+			sigla: 'OTR',
+			titulo: o.bien_asegurado || `Otro bien #${o.id}`,
+			tipo: o.tipo_seguro || 'Otro',
+			raw: o as unknown as Record<string, unknown>,
+			fields: [
+				{ label: 'Cliente', value: getClienteName(o.id_usuario), strong: true },
+				{ label: 'Valor a asegurar', value: formatValue(o.valor_bien_asegurar), strong: true },
+				{ label: OtroBienFields.detalles_bien_asegurado.label, value: displayValue(o.detalles_bien_asegurado) }
+			]
+		}));
+	}
+
+	$: rubroSingular =
+		activeTab === 'HOGAR'
+			? 'hogar'
+			: activeTab === 'VEHICULO'
+				? 'vehículo'
+				: activeTab === 'COPROPIEDAD'
+					? 'copropiedad'
+					: 'otro bien';
+
+	$: rubroPlural =
+		activeTab === 'HOGAR'
+			? 'hogares'
+			: activeTab === 'VEHICULO'
+				? 'vehículos'
+				: activeTab === 'COPROPIEDAD'
+					? 'copropiedades'
+					: 'otros bienes';
 </script>
 
 <svelte:head>
 	<title>Bienes | {APP_NAME}</title>
 </svelte:head>
 
-<!-- Header -->
-<header class="page-header">
-	<h1 class="page-title">Bienes</h1>
-	<p class="text-secondary-500 text-sm mt-1">
-		{counts.total} bien{counts.total !== 1 ? 'es' : ''} registrado{counts.total !== 1 ? 's' : ''}
-	</p>
-</header>
+<div class="page-shell">
+	<PageHeader
+		title="Bienes"
+		crumb="Inicio / Operación"
+		subtitle="Hogares, vehículos, copropiedades y otros bienes asegurables"
+	>
+		<button slot="actions" type="button" class="btn-primary !min-h-[38px]" on:click={handleNuevoBien}>
+			Nuevo bien
+		</button>
+	</PageHeader>
 
-<!-- Content -->
-<div class="page-content">
-	<div class="card">
-		<!-- Toolbar -->
-		<div class="flex flex-wrap items-center justify-between gap-4 mb-6">
-			<div class="flex items-center gap-4">
-				<button 
-					class="btn btn-primary flex items-center gap-1.5"
-					on:click={handleNuevoBien}
-				>
-					<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-						<path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
-					</svg>
-					Nuevo Bien
-				</button>
-			</div>
+	<!-- Cliente lookup: the backend filters bienes by owner, so this searches
+	     the cliente by document first and then reloads the lists. -->
+	<div class="filter-bar">
+		<div class="relative flex-1 min-w-[200px]">
+			<svg
+				class="absolute left-3 top-1/2 -translate-y-1/2 opacity-50"
+				width="16"
+				height="16"
+				viewBox="0 0 24 24"
+				fill="none"
+				stroke="currentColor"
+				stroke-width="1.5"
+			>
+				<circle cx="11" cy="11" r="6.5" />
+				<path d="M16 16l4.5 4.5" />
+			</svg>
+			<input
+				id="documento-filter"
+				type="search"
+				class="input !pl-9 !min-h-[38px]"
+				placeholder="Filtrar por documento del cliente (CC o NIT)…"
+				aria-label="Filtrar por documento del cliente"
+				bind:value={documentoFilter}
+				on:keydown={handleSearchKeydown}
+			/>
+		</div>
 
-			<!-- Filtro por documento -->
-			<div class="flex items-center gap-3">
-				<div class="flex items-center gap-2">
-					<label for="documento-filter" class="text-sm text-secondary-600 whitespace-nowrap">Buscar por documento:</label>
-					<div class="relative">
-						<input
-							id="documento-filter"
-							type="text"
-							class="input w-48 pr-8"
-							placeholder="CC o NIT..."
-							bind:value={documentoFilter}
-							on:keydown={handleSearchKeydown}
-						/>
-						{#if documentoFilter}
-							<button
-								type="button"
-								class="absolute right-2 top-1/2 -translate-y-1/2 text-secondary-400 hover:text-secondary-600"
-								on:click={clearFilter}
-							>
-								<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-									<path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-								</svg>
-							</button>
-						{/if}
-					</div>
+		<button
+			type="button"
+			class="btn-secondary !min-h-[38px]"
+			on:click={searchByDocumento}
+			disabled={searchingCliente}
+		>
+			{searchingCliente ? 'Buscando…' : 'Buscar'}
+		</button>
+
+		{#if filteredCliente}
+			<Tag variant="accent">
+				{filteredCliente.tipo_persona === 'PERSONA'
+					? filteredCliente.nombre
+					: filteredCliente.razon_social}
+			</Tag>
+			<button type="button" class="btn-ghost !min-h-[38px]" on:click={clearFilter}>
+				Limpiar filtros
+			</button>
+		{:else if documentoFilter && !searchingCliente}
+			<Tag variant="outline">Cliente no encontrado</Tag>
+		{/if}
+
+		<div class="ml-auto text-xs whitespace-nowrap" style="color: var(--color-text-55)">
+			{counts.total} bien{counts.total !== 1 ? 'es' : ''}
+		</div>
+	</div>
+
+	<!-- Tabs -->
+	<div class="tabs mb-3.5">
+		{#each tabsWithCounts as tab}
+			<button
+				type="button"
+				class="tab {activeTab === tab.id ? 'tab-active' : ''}"
+				on:click={() => setActiveTab(tab.id)}
+			>
+				{tab.label}
+				<span class="tab-count">{tab.count}</span>
+			</button>
+		{/each}
+	</div>
+
+	{#if loading}
+		<SkeletonRows count={4} />
+	{:else if error}
+		<EmptyState title="No fue posible cargar los bienes" text={error}>
+			<button slot="action" type="button" class="btn-secondary" on:click={loadBienes}>
+				Reintentar
+			</button>
+		</EmptyState>
+	{:else if !bienRows.length}
+		<EmptyState
+			title="No hay {rubroPlural}"
+			text={selectedClienteId
+				? 'Este cliente no tiene bienes de este tipo registrados.'
+				: 'Todavía no se han registrado bienes de este tipo.'}
+		>
+			<button slot="action" type="button" class="btn-primary" on:click={handleNuevoBien}>
+				Registrar {rubroSingular}
+			</button>
+		</EmptyState>
+	{:else}
+		<div class="row-list">
+			{#each bienRows as bien (bien.id)}
+				<ListRowCard fields={bien.fields}>
+					<Avatar slot="lead" text={bien.sigla} shape="square" />
+
 					<button
-						class="btn btn-secondary flex items-center gap-1"
-						on:click={searchByDocumento}
-						disabled={searchingCliente}
+						slot="title"
+						type="button"
+						class="row-card-link"
+						on:click={() => viewBien(activeTab, bien.raw)}
 					>
-						{#if searchingCliente}
-							<svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
-								<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-								<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-							</svg>
-						{:else}
-							<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-								<path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-							</svg>
-						{/if}
-						Buscar
+						{bien.titulo}
 					</button>
-				</div>
-				
-				<!-- Info del cliente encontrado -->
-				{#if filteredCliente}
-					<div class="flex items-center gap-2 px-3 py-1.5 bg-primary-50 border border-primary-200 rounded-lg text-sm">
-						<span class="text-primary-700 font-medium">
-							{filteredCliente.tipo_persona === 'PERSONA' ? filteredCliente.nombre : filteredCliente.razon_social}
-						</span>
+
+					<svelte:fragment slot="tags">
+						<Tag variant="accent">{bien.tipo}</Tag>
+						<Tag variant="neutral">#{bien.id}</Tag>
+					</svelte:fragment>
+
+					<svelte:fragment slot="actions">
 						<button
 							type="button"
-							class="text-primary-400 hover:text-primary-600"
-							on:click={clearFilter}
-							title="Quitar filtro"
+							class="btn-secondary !h-8 !py-0 !px-3 !text-xs"
+							on:click={() => irACrearPropuesta(activeTab, bien.raw)}
 						>
-							<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-								<path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-							</svg>
+							Crear propuesta
 						</button>
-					</div>
-				{:else if documentoFilter && !searchingCliente}
-					<span class="text-sm text-amber-600">Cliente no encontrado</span>
-				{/if}
-			</div>
+						<DropdownMenu width={210} height={150}>
+							<button type="button" class="menu-item" on:click={() => viewBien(activeTab, bien.raw)}>
+								Ver detalle
+							</button>
+							<button type="button" class="menu-item" on:click={() => editBien(activeTab, bien.id)}>
+								Editar bien
+							</button>
+							<button
+								type="button"
+								class="menu-item"
+								on:click={() => irACrearPropuesta(activeTab, bien.raw)}
+							>
+								Crear propuesta
+							</button>
+						</DropdownMenu>
+					</svelte:fragment>
+				</ListRowCard>
+			{/each}
 		</div>
-
-		<!-- Tabs -->
-		<div class="border-b border-secondary-200 mb-6">
-			<nav class="flex gap-1 -mb-px">
-				{#each tabs as tab}
-					<button
-						type="button"
-						class="px-4 py-3 text-sm font-medium border-b-2 transition-colors flex items-center gap-2
-							{activeTab === tab.id 
-								? 'border-primary-500 text-primary-600' 
-								: 'border-transparent text-secondary-500 hover:text-secondary-700 hover:border-secondary-300'}"
-						on:click={() => setActiveTab(tab.id)}
-					>
-						<span>{tab.icon}</span>
-						<span>{tab.label}</span>
-					</button>
-				{/each}
-			</nav>
-		</div>
-
-		<!-- Loading State -->
-		{#if loading}
-			<div class="flex items-center justify-center py-12">
-				<div class="flex flex-col items-center gap-4">
-					<svg class="animate-spin h-8 w-8 text-primary-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-						<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-						<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-					</svg>
-					<p class="text-secondary-600">Cargando bienes...</p>
-				</div>
-			</div>
-		{:else if error}
-			<div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-				<p class="font-medium">Error</p>
-				<p class="text-sm">{error}</p>
-			</div>
-		{:else}
-			<!-- Data Table -->
-			<DataTable 
-				columns={activeColumns} 
-				data={activeData}
-				showActions={false}
-			>
-				<svelte:fragment slot="cell" let:row let:column let:value>
-					{#if column.key === 'id'}
-						<span class="data-table-id">#{value}</span>
-					{:else if column.key === 'valor_inmueble_avaluo' || column.key === 'valor_vehiculo' || column.key === 'valor_bien_asegurar'}
-						<span class="font-medium text-secondary-900">{formatValue(value)}</span>
-					{:else if column.key === 'placa'}
-						<span class="font-mono font-medium text-secondary-900">{displayValue(value)}</span>
-					{:else if column.key === 'tipo_inmueble' || column.key === 'tipo_vehiculo' || column.key === 'tipo_copropiedad' || column.key === 'tipo_seguro'}
-						<span class="px-2 py-1 text-xs font-medium rounded-full bg-primary-100 text-primary-700">
-							{displayValue(value)}
-						</span>
-					{:else if column.key === 'acciones'}
-						<div class="flex items-center gap-1">
-							<button 
-								type="button"
-								class="p-1.5 text-secondary-500 hover:text-green-600 hover:bg-green-50 rounded transition-colors"
-								title="Crear propuesta"
-								on:click|stopPropagation={() => irACrearPropuesta(activeTab, row)}
-							>
-								<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-									<path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-								</svg>
-							</button>
-							<button 
-								type="button"
-								class="p-1.5 text-secondary-500 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors"
-								title="Ver detalles"
-								on:click|stopPropagation={() => viewBien(activeTab, row)}
-							>
-								<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-									<path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-									<path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-								</svg>
-							</button>
-							<button 
-								type="button"
-								class="p-1.5 text-secondary-500 hover:text-primary-600 hover:bg-primary-50 rounded transition-colors"
-								title="Editar"
-								on:click|stopPropagation={() => editBien(activeTab, Number(row.id))}
-							>
-								<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-									<path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-								</svg>
-							</button>
-						</div>
-					{:else}
-						{displayValue(value)}
-					{/if}
-				</svelte:fragment>
-
-				<svelte:fragment slot="empty">
-					<div class="flex flex-col items-center justify-center py-12">
-						<div class="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mb-4">
-							<span class="text-3xl">
-								{activeTab === 'HOGAR' ? '🏠' : activeTab === 'VEHICULO' ? '🚗' : activeTab === 'COPROPIEDAD' ? '🏢' : '📦'}
-							</span>
-						</div>
-						<p class="text-lg font-medium text-secondary-900 mb-2">
-							No hay {activeTab === 'HOGAR' ? 'hogares' : activeTab === 'VEHICULO' ? 'vehículos' : activeTab === 'COPROPIEDAD' ? 'copropiedades' : 'otros bienes'}
-						</p>
-						<p class="text-secondary-500 text-center max-w-sm mb-4">
-							{selectedClienteId ? 'Este cliente no tiene bienes de este tipo registrados.' : 'No se han registrado bienes de este tipo.'}
-						</p>
-						<button 
-							class="btn btn-primary"
-							on:click={handleNuevoBien}
-						>
-							Registrar {activeTab === 'HOGAR' ? 'Hogar' : activeTab === 'VEHICULO' ? 'Vehículo' : activeTab === 'COPROPIEDAD' ? 'Copropiedad' : 'Otro Bien'}
-						</button>
-					</div>
-				</svelte:fragment>
-			</DataTable>
-		{/if}
-	</div>
+	{/if}
 </div>
 
 <!-- Modal de Visualización -->

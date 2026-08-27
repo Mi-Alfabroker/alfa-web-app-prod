@@ -3,9 +3,10 @@
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 	import { APP_NAME } from '$lib/config';
-	import { FormField, FormSection, Input, Select, CurrencyInput, Modal } from '$components';
+	import { CurrencyInput, FlujoPoliza, FormField, FormSection, Input, Modal, PageHeader, Select } from '$components';
 	import { polizaService, bienService, clienteService, aseguradoraService, propuestaService } from '$services';
 	import { addNotification } from '$lib/stores/notifications';
+	import { invalidateCatalog } from '$lib/stores/catalog';
 	import { getAuthUser } from '$lib/stores/auth';
 	import type { PolizaOtroBien } from '$lib/types/poliza';
 	import type { OtroBien } from '$lib/types/bien';
@@ -15,6 +16,12 @@
 
 	// Route params
 	$: polizaId = Number($page.params.id);
+	/*
+	 * El documento a producir lo decide la URL, no el estado de la póliza. Antes
+	 * esta misma ruta cambiaba de propósito sola según el estado, que era la
+	 * fuente principal de confusión del flujo.
+	 */
+	$: modoEntrega = $page.url.searchParams.get('doc') === 'entrega';
 
 	// Data state
 	let poliza: PolizaOtroBien | null = null;
@@ -460,6 +467,21 @@
 
 			generatedFilename = result.filename;
 			generatedSavedPath = result.savedPath;
+			// El backend de generación recibe template_name + variables y no sabe de
+			// qué póliza viene, así que la marca se hace aquí. Si esto falla la
+			// descarga ya ocurrió: se avisa y el usuario puede volver a generar
+			// (la operación es idempotente).
+			try {
+				poliza = await polizaService.otroBien.marcarDocumento(polizaId, 'propuesta');
+				invalidateCatalog();
+			} catch (marcaErr) {
+				addNotification({
+					type: 'warning',
+					title: 'Documento generado, marca pendiente',
+					message: 'Se descargó el documento pero no se pudo registrar. Vuelve a generarlo.'
+				});
+			}
+
 			
 			// Guardar valores de cuotas calculadas en la póliza
 			await guardarValoresCuotas();
@@ -507,6 +529,22 @@
 
 			generatedFilename = result.filename;
 			generatedSavedPath = result.savedPath;
+			// El backend de generación recibe template_name + variables y no sabe de
+			// qué póliza viene, así que la marca se hace aquí. Si esto falla la
+			// descarga ya ocurrió: se avisa y el usuario puede volver a generar
+			// (la operación es idempotente).
+			try {
+				poliza = await polizaService.otroBien.marcarDocumento(polizaId, 'entrega');
+				invalidateCatalog();
+			} catch (marcaErr) {
+				addNotification({
+					type: 'warning',
+					title: 'Documento generado, marca pendiente',
+					message: 'Se descargó el documento pero no se pudo registrar. Vuelve a generarlo.'
+				});
+			}
+
+
 			showSuccessModal = true;
 
 		} catch (err) {
@@ -580,71 +618,42 @@
 </svelte:head>
 
 <!-- Header -->
-<header class="page-header">
-	<div class="flex items-center gap-4">
-		<button 
-			type="button" 
-			class="p-2 hover:bg-secondary-100 rounded-lg transition-colors"
-			on:click={() => goto(`/propuestas/otro/${polizaId}`)}
-		>
-			<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-				<path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
-			</svg>
-		</button>
-		<div>
-			<h1 class="page-title">Generar Propuesta Otros</h1>
-			{#if poliza}
-				<p class="text-secondary-500 text-sm mt-1 font-mono">{poliza.consecutivo}</p>
+<div class="page-shell">
+	<PageHeader
+		title="Generar propuesta Otros ramos"
+		crumb="Inicio / Operación / Pólizas"
+		subtitle={poliza ? poliza.consecutivo : ''}
+		backHref="/propuestas/otro/{polizaId}"
+		backLabel="Volver a la póliza"
+	>
+		<svelte:fragment slot="actions">
+			{#if !modoEntrega}
+				<button
+					type="button"
+					class="btn-primary !min-h-[38px]"
+					on:click={generarPropuesta}
+					disabled={loading || generating || generatingEntrega || !poliza}
+				>
+					{generating ? 'Generando…' : 'Generar propuesta'}
+				</button>
 			{/if}
-		</div>
-	</div>
-	
-	<div class="flex items-center gap-3">
-		<button
-			type="button"
-			class="btn btn-primary flex items-center gap-2"
-			on:click={generarPropuesta}
-			disabled={loading || generating || generatingEntrega || !poliza}
-		>
-			{#if generating}
-				<svg class="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
-					<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-					<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-				</svg>
-				Generando...
-			{:else}
-				<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-					<path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-				</svg>
-				Generar Propuesta
+			{#if modoEntrega}
+				<button
+					type="button"
+					class="btn-primary !min-h-[38px]"
+					on:click={generarEntrega}
+					disabled={loading || generating || generatingEntrega || !poliza}
+				>
+					{generatingEntrega ? 'Generando entrega…' : 'Generar documento de entrega'}
+				</button>
 			{/if}
-		</button>
-		{#if poliza?.estado === 'VIGENTE'}
-			<button
-				type="button"
-				class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
-				on:click={generarEntrega}
-				disabled={loading || generating || generatingEntrega || !poliza}
-			>
-				{#if generatingEntrega}
-					<svg class="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
-						<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-						<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-					</svg>
-					Generando Entrega...
-				{:else}
-					<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-						<path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-					</svg>
-					Generar Entrega
-				{/if}
-			</button>
-		{/if}
-	</div>
-</header>
+		</svelte:fragment>
+	</PageHeader>
 
-<!-- Content -->
-<div class="page-content">
+	{#if poliza}
+		<FlujoPoliza {poliza} rubroSlug="otro" pasoActual={modoEntrega ? 'entrega' : 'propuesta'} />
+	{/if}
+
 	{#if loading}
 		<div class="flex items-center justify-center py-12">
 			<div class="flex flex-col items-center gap-4">

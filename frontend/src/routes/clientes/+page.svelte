@@ -1,128 +1,98 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { APP_NAME } from '$lib/config';
-	import { DataTable, Modal } from '$components';
 	import { goto } from '$app/navigation';
-	import { clienteService } from '$services';
+	import { APP_NAME } from '$lib/config';
+	import {
+		Avatar,
+		DropdownMenu,
+		EmptyState,
+		FilterBar,
+		ListRowCard,
+		Modal,
+		PageHeader,
+		SkeletonRows,
+		Tag
+	} from '$components';
 	import { ClienteFields } from '$constants';
+	import { catalog, loadCatalog } from '$lib/stores/catalog';
+	import { buildPolizaRows, clienteDocumento, clienteNombre } from '$utils';
 	import type { Cliente } from '$lib/types/cliente';
 
-	// Alias para mayor legibilidad
 	const F = ClienteFields;
 
-	// Table columns usando constantes
-	const columns = [
-		{ key: F.id.db, label: F.id.label, sortable: true },
-		{ key: 'documento', label: 'Documento', sortable: true },
-		{ key: 'display_name', label: 'Nombre / Razón Social', sortable: true },
-		{ key: F.tipo_persona.db, label: F.tipo_persona.label, sortable: true },
-		{ key: F.correo.db, label: F.correo.label, sortable: true },
-		{ key: F.telefono_movil.db, label: F.telefono_movil.label, sortable: false },
-		{ key: F.ciudad.db, label: F.ciudad.label, sortable: true },
-		{ key: 'acciones', label: 'Acciones', sortable: false }
-	];
+	// Filters
+	let query = '';
+	let filtroTipo = '';
+	let filtroCiudad = '';
 
-	// Data from API
-	let allData: Record<string, unknown>[] = [];
-	let data: Record<string, unknown>[] = [];
-	let loading = true;
-	let error: string | null = null;
-
-	// Filtro por documento
-	let documentoFilter: string = '';
-
-	// Modal state
+	// Detail modal
 	let showModal = false;
 	let selectedCliente: Cliente | null = null;
 
-	// Secciones colapsables del modal
-	let modalSections = {
-		general: true,
-		contacto: true,
-		persona: false,
-		empresa: false
-	};
-
-	function toggleModalSection(key: keyof typeof modalSections) {
-		modalSections[key] = !modalSections[key];
-	}
-
-	// Load clientes from API
-	onMount(async () => {
-		try {
-			const response = await clienteService.getAll();
-			console.log('✅ Clientes Response:', response);
-			// Agregar campos display_name y documento para la tabla
-			allData = (response || []).map((cliente: Cliente) => ({
-				...cliente,
-				display_name: cliente.tipo_persona === 'PERSONA' 
-					? cliente.nombre 
-					: cliente.razon_social,
-				documento: cliente.tipo_persona === 'PERSONA'
-					? cliente.numero_documento
-					: cliente.nit
-			}));
-			// Ordenar del más nuevo al más antiguo (ID descendente)
-			allData.sort((a, b) => Number(b.id) - Number(a.id));
-			data = allData;
-		} catch (err) {
-			console.error('❌ Error loading clientes:', err);
-			error = err instanceof Error ? err.message : 'Error al cargar clientes';
-		} finally {
-			loading = false;
-		}
+	onMount(() => {
+		void loadCatalog();
 	});
 
-	// Filtrar por documento
-	function filterByDocumento() {
-		if (!documentoFilter.trim()) {
-			data = allData;
-			return;
-		}
-		const searchTerm = documentoFilter.trim().toLowerCase();
-		data = allData.filter(cliente => {
-			const doc = String(cliente.documento || '').toLowerCase();
-			return doc.includes(searchTerm);
-		});
+	/** Póliza counts per cliente, so a row can show how much business it holds. */
+	$: polizasPorCliente = buildPolizaRows($catalog).reduce<Record<number, number>>((acc, row) => {
+		if (row.clienteId) acc[row.clienteId] = (acc[row.clienteId] ?? 0) + 1;
+		return acc;
+	}, {});
+
+	/** Bien counts per cliente, across the four collections. */
+	$: bienesPorCliente = [
+		...$catalog.hogares,
+		...$catalog.vehiculos,
+		...$catalog.copropiedades,
+		...$catalog.otrosBienes
+	].reduce<Record<number, number>>((acc, bien) => {
+		acc[bien.id_usuario] = (acc[bien.id_usuario] ?? 0) + 1;
+		return acc;
+	}, {});
+
+	$: ciudades = Array.from(
+		new Set($catalog.clientes.map((c) => c.ciudad).filter((c): c is string => !!c))
+	).sort((a, b) => a.localeCompare(b, 'es'));
+
+	$: filtered = $catalog.clientes.filter((c) => {
+		const q = query.trim().toLowerCase();
+		const matchesQuery =
+			!q ||
+			clienteNombre(c).toLowerCase().includes(q) ||
+			clienteDocumento(c).toLowerCase().includes(q) ||
+			(c.correo ?? '').toLowerCase().includes(q);
+		return (
+			matchesQuery &&
+			(!filtroTipo || c.tipo_persona === filtroTipo) &&
+			(!filtroCiudad || c.ciudad === filtroCiudad)
+		);
+	});
+
+	function resetFilters() {
+		query = '';
+		filtroTipo = '';
+		filtroCiudad = '';
 	}
 
-	// Limpiar filtro
-	function clearFilter() {
-		documentoFilter = '';
-		data = allData;
-	}
-
-	// Manejar Enter en búsqueda
-	function handleSearchKeydown(event: KeyboardEvent) {
-		if (event.key === 'Enter') {
-			filterByDocumento();
-		}
-	}
-
-	// Handle view action
-	function viewCliente(row: Record<string, unknown>) {
-		selectedCliente = row as unknown as Cliente;
+	function viewCliente(cliente: Cliente) {
+		selectedCliente = cliente;
 		showModal = true;
 	}
 
-	// Handle edit action
-	function editCliente(id: number) {
-		goto(`/clientes/${id}/editar`);
-	}
-
-	// Helper para mostrar valor o placeholder
 	function displayValue(value: unknown): string {
-		if (value === null || value === undefined || value === '') {
-			return '—';
-		}
+		if (value === null || value === undefined || value === '') return '—';
 		return String(value);
 	}
 
-	// Helper para badge de tipo persona
-	function getTipoPersonaBadge(tipo: string) {
-		return tipo === 'PERSONA' 
-			? { text: 'Persona', class: 'bg-blue-100 text-blue-700' }
-			: { text: 'Empresa', class: 'bg-purple-100 text-purple-700' };
+	function fieldsFor(c: Cliente) {
+		return [
+			{ label: 'Documento', value: clienteDocumento(c), strong: true },
+			{ label: F.ciudad.label, value: displayValue(c.ciudad) },
+			{ label: F.correo.label, value: displayValue(c.correo) },
+			{ label: F.telefono_movil.label, value: displayValue(c.telefono_movil) },
+			{ label: 'Bienes asegurados', value: String(bienesPorCliente[c.id] ?? 0) },
+			{ label: F.direccion.label, value: displayValue(c.direccion) }
+		];
 	}
 </script>
 
@@ -130,350 +100,247 @@
 	<title>Clientes | {APP_NAME}</title>
 </svelte:head>
 
-<!-- Header -->
-<header class="page-header">
-	<h1 class="page-title">Clientes</h1>
-</header>
+<div class="page-shell">
+	<PageHeader
+		title="Clientes"
+		crumb="Inicio / Operación"
+		subtitle="Personas y empresas con bienes asegurados"
+	>
+		<a slot="actions" href="/clientes/nuevo" class="btn-primary !min-h-[38px]">Nuevo cliente</a>
+	</PageHeader>
 
-<!-- Content -->
-<div class="page-content">
-	<div class="card">
-		<!-- Toolbar -->
-		<div class="flex flex-wrap items-center justify-between gap-4 mb-4">
-			<a href="/clientes/nuevo" class="btn btn-primary flex items-center gap-1.5">
-				<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-					<path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
-				</svg>
-				Nuevo Cliente
-			</a>
+	<FilterBar
+		bind:query
+		placeholder="Buscar por nombre, documento o correo…"
+		selects={[
+			{
+				value: filtroTipo,
+				label: 'Tipo de persona',
+				options: [
+					{ value: '', label: 'Personas y empresas' },
+					{ value: 'PERSONA', label: 'Persona natural' },
+					{ value: 'EMPRESA', label: 'Empresa' }
+				],
+				onChange: (v) => (filtroTipo = v)
+			},
+			{
+				value: filtroCiudad,
+				label: 'Ciudad',
+				options: [
+					{ value: '', label: 'Todas las ciudades' },
+					...ciudades.map((c) => ({ value: c, label: c }))
+				],
+				onChange: (v) => (filtroCiudad = v)
+			}
+		]}
+		count={filtered.length}
+		countNoun="cliente"
+		onReset={resetFilters}
+	/>
 
-			<!-- Filtro por documento -->
-			<div class="flex items-center gap-2">
-				<label for="documento-filter" class="text-sm text-secondary-600 whitespace-nowrap">Buscar por documento:</label>
-				<div class="relative">
-					<input
-						id="documento-filter"
-						type="text"
-						class="input w-48 pr-8"
-						placeholder="CC o NIT..."
-						bind:value={documentoFilter}
-						on:keydown={handleSearchKeydown}
-					/>
-					{#if documentoFilter}
-						<button
-							type="button"
-							class="absolute right-2 top-1/2 -translate-y-1/2 text-secondary-400 hover:text-secondary-600"
-							on:click={clearFilter}
+	{#if $catalog.loading && !$catalog.loaded}
+		<SkeletonRows count={5} />
+	{:else if $catalog.error}
+		<EmptyState title="No fue posible cargar los clientes" text={$catalog.error}>
+			<button slot="action" type="button" class="btn-secondary" on:click={() => loadCatalog(true)}>
+				Reintentar
+			</button>
+		</EmptyState>
+	{:else if !filtered.length}
+		<EmptyState
+			title={$catalog.clientes.length ? 'Sin resultados' : 'Aún no hay clientes'}
+			text={$catalog.clientes.length
+				? 'Ningún cliente coincide con la búsqueda o los filtros aplicados. Puedes buscar por nombre, documento o correo.'
+				: 'Registra el primer cliente para empezar a crear bienes y propuestas.'}
+		>
+			<svelte:fragment slot="action">
+				{#if $catalog.clientes.length}
+					<button type="button" class="btn-secondary" on:click={resetFilters}>
+						Limpiar filtros
+					</button>
+				{:else}
+					<a href="/clientes/nuevo" class="btn-primary">Nuevo cliente</a>
+				{/if}
+			</svelte:fragment>
+		</EmptyState>
+	{:else}
+		<div class="row-list">
+			{#each filtered as cliente (cliente.id)}
+				<ListRowCard fields={fieldsFor(cliente)}>
+					<Avatar slot="lead" name={clienteNombre(cliente)} shape="circle" />
+
+					<span slot="title" class="row-card-title">{clienteNombre(cliente)}</span>
+
+					<svelte:fragment slot="tags">
+						<Tag variant={cliente.tipo_persona === 'PERSONA' ? 'accent-2' : 'accent'}>
+							{cliente.tipo_persona === 'PERSONA' ? 'Persona natural' : 'Empresa'}
+						</Tag>
+						<Tag variant="neutral">
+							{polizasPorCliente[cliente.id] ?? 0}
+							{(polizasPorCliente[cliente.id] ?? 0) === 1 ? 'póliza' : 'pólizas'}
+						</Tag>
+					</svelte:fragment>
+
+					<svelte:fragment slot="actions">
+						<a
+							class="btn-secondary !h-8 !py-0 !px-3 !text-xs"
+							href="/propuestas?q={encodeURIComponent(clienteNombre(cliente))}"
 						>
-							<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-								<path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-							</svg>
-						</button>
-					{/if}
-				</div>
-				<button
-					class="btn btn-secondary flex items-center gap-1"
-					on:click={filterByDocumento}
-				>
-					<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-						<path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-					</svg>
-					Buscar
-				</button>
-			</div>
+							Ver pólizas
+						</a>
+						<DropdownMenu width={210} height={150}>
+							<button type="button" class="menu-item" on:click={() => viewCliente(cliente)}>
+								Ver ficha
+							</button>
+							<a class="menu-item" href="/clientes/{cliente.id}/editar">Editar cliente</a>
+							<a class="menu-item" href="/bienes?cliente={cliente.id}">Ver bienes</a>
+						</DropdownMenu>
+					</svelte:fragment>
+				</ListRowCard>
+			{/each}
 		</div>
-
-		<!-- Loading State -->
-		{#if loading}
-			<div class="flex items-center justify-center py-12">
-				<div class="flex flex-col items-center gap-4">
-					<svg class="animate-spin h-8 w-8 text-primary-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-						<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-						<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-					</svg>
-					<p class="text-secondary-600">Cargando clientes...</p>
-				</div>
-			</div>
-		{:else if error}
-			<div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-				<p class="font-medium">Error</p>
-				<p class="text-sm">{error}</p>
-			</div>
-		{:else}
-			<!-- Data Table -->
-			<DataTable 
-				{columns} 
-				{data}
-				showActions={false}
-			>
-				<svelte:fragment slot="cell" let:row let:column let:value>
-					{#if column.key === F.id.db}
-						<span class="data-table-id">#{value}</span>
-					{:else if column.key === 'documento'}
-						<span class="font-mono text-sm text-secondary-700">{displayValue(value)}</span>
-					{:else if column.key === 'display_name'}
-						<span class="font-medium text-secondary-900">{displayValue(value)}</span>
-					{:else if column.key === F.tipo_persona.db}
-						{@const badge = getTipoPersonaBadge(String(value))}
-						<span class="px-2 py-1 text-xs font-medium rounded-full {badge.class}">
-							{badge.text}
-						</span>
-					{:else if column.key === F.correo.db}
-						{#if value}
-							<a href="mailto:{value}" class="text-primary-600 hover:text-primary-700 hover:underline">
-								{value}
-							</a>
-						{:else}
-							<span class="text-secondary-400">—</span>
-						{/if}
-					{:else if column.key === 'acciones'}
-						<div class="flex items-center gap-1">
-							<button 
-								type="button"
-								class="p-1.5 text-secondary-500 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors"
-								title="Ver detalles"
-								on:click|stopPropagation={() => viewCliente(row)}
-							>
-								<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-									<path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-									<path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-								</svg>
-							</button>
-							<button 
-								type="button"
-								class="p-1.5 text-secondary-500 hover:text-primary-600 hover:bg-primary-50 rounded transition-colors"
-								title="Editar"
-								on:click|stopPropagation={() => editCliente(Number(row.id))}
-							>
-								<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-									<path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-								</svg>
-							</button>
-						</div>
-					{:else}
-						{displayValue(value)}
-					{/if}
-				</svelte:fragment>
-
-				<svelte:fragment slot="empty">
-					<div class="empty-state">
-						<div class="empty-state-icon">👥</div>
-						<p class="empty-state-title">No hay clientes</p>
-						<p class="empty-state-text">Agrega un nuevo cliente para comenzar</p>
-					</div>
-				</svelte:fragment>
-			</DataTable>
-		{/if}
-	</div>
+	{/if}
 </div>
 
-<!-- Modal de Visualización -->
-<Modal 
-	bind:open={showModal} 
-	title={selectedCliente?.tipo_persona === 'PERSONA' ? selectedCliente?.nombre : selectedCliente?.razon_social || 'Detalles del Cliente'} 
+<!-- Detail modal -->
+<Modal
+	bind:open={showModal}
+	title={selectedCliente ? clienteNombre(selectedCliente) : 'Detalles del cliente'}
 	size="lg"
 >
 	{#if selectedCliente}
 		<div class="space-y-4">
-			<!-- Información General -->
-			<div class="border border-secondary-200 rounded-lg overflow-hidden">
-				<button 
-					type="button"
-					class="w-full flex items-center justify-between px-4 py-3 bg-secondary-50 text-left text-sm font-semibold text-secondary-900 hover:bg-secondary-100 transition-colors"
-					on:click={() => toggleModalSection('general')}
-				>
-					<span>Información General</span>
-					<svg class="w-5 h-5 transition-transform {modalSections.general ? 'rotate-180' : ''}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-					</svg>
-				</button>
-				{#if modalSections.general}
-					<div class="px-4 py-4 bg-white border-t border-secondary-200">
-						<div class="grid grid-cols-2 gap-4">
-							<div>
-								<p class="text-xs text-secondary-500 mb-1">{F.id.label}</p>
-								<p class="text-sm font-medium text-secondary-900">#{selectedCliente.id}</p>
-							</div>
-							<div>
-								<p class="text-xs text-secondary-500 mb-1">{F.tipo_persona.label}</p>
-								{#if selectedCliente.tipo_persona === 'PERSONA'}
-									<span class="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-700">
-										Persona
-									</span>
+			<div class="card-flat !p-0">
+				<div class="field-grid p-4">
+					<div>
+						<div class="field-label">{F.id.label}</div>
+						<div class="field-value">#{selectedCliente.id}</div>
+					</div>
+					<div>
+						<div class="field-label">{F.tipo_persona.label}</div>
+						<Tag variant={selectedCliente.tipo_persona === 'PERSONA' ? 'accent-2' : 'accent'}>
+							{selectedCliente.tipo_persona === 'PERSONA' ? 'Persona natural' : 'Empresa'}
+						</Tag>
+					</div>
+					<div>
+						<div class="field-label">{F.usuario.label}</div>
+						<div class="field-value">{displayValue(selectedCliente.usuario)}</div>
+					</div>
+					<div>
+						<div class="field-label">{F.tipo_usuario.label}</div>
+						<div class="field-value">{displayValue(selectedCliente.tipo_usuario)}</div>
+					</div>
+				</div>
+			</div>
+
+			<div>
+				<h3 class="card-heading">Contacto</h3>
+				<div class="field-grid">
+					<div>
+						<div class="field-label">{F.correo.label}</div>
+						<div class="field-value">
+							{#if selectedCliente.correo}
+								<a href="mailto:{selectedCliente.correo}">{selectedCliente.correo}</a>
+							{:else}
+								—
+							{/if}
+						</div>
+					</div>
+					<div>
+						<div class="field-label">{F.telefono_movil.label}</div>
+						<div class="field-value">{displayValue(selectedCliente.telefono_movil)}</div>
+					</div>
+					<div>
+						<div class="field-label">{F.ciudad.label}</div>
+						<div class="field-value">{displayValue(selectedCliente.ciudad)}</div>
+					</div>
+					<div>
+						<div class="field-label">{F.direccion.label}</div>
+						<div class="field-value">{displayValue(selectedCliente.direccion)}</div>
+					</div>
+				</div>
+			</div>
+
+			{#if selectedCliente.tipo_persona === 'PERSONA'}
+				<div>
+					<h3 class="card-heading">Datos personales</h3>
+					<div class="field-grid">
+						<div>
+							<div class="field-label">{F.nombre.label}</div>
+							<div class="field-value">{displayValue(selectedCliente.nombre)}</div>
+						</div>
+						<div>
+							<div class="field-label">{F.tipo_documento.label}</div>
+							<div class="field-value">{displayValue(selectedCliente.tipo_documento)}</div>
+						</div>
+						<div>
+							<div class="field-label">{F.numero_documento.label}</div>
+							<div class="field-value">{displayValue(selectedCliente.numero_documento)}</div>
+						</div>
+						<div>
+							<div class="field-label">{F.edad.label}</div>
+							<div class="field-value">{displayValue(selectedCliente.edad)}</div>
+						</div>
+					</div>
+				</div>
+			{:else}
+				<div>
+					<h3 class="card-heading">Datos de la empresa</h3>
+					<div class="field-grid">
+						<div>
+							<div class="field-label">{F.razon_social.label}</div>
+							<div class="field-value">{displayValue(selectedCliente.razon_social)}</div>
+						</div>
+						<div>
+							<div class="field-label">{F.nit.label}</div>
+							<div class="field-value">{displayValue(selectedCliente.nit)}</div>
+						</div>
+						<div>
+							<div class="field-label">{F.nombre_rep_legal.label}</div>
+							<div class="field-value">{displayValue(selectedCliente.nombre_rep_legal)}</div>
+						</div>
+						<div>
+							<div class="field-label">{F.documento_rep_legal.label}</div>
+							<div class="field-value">{displayValue(selectedCliente.documento_rep_legal)}</div>
+						</div>
+						<div>
+							<div class="field-label">{F.telefono_rep_legal.label}</div>
+							<div class="field-value">{displayValue(selectedCliente.telefono_rep_legal)}</div>
+						</div>
+						<div>
+							<div class="field-label">{F.correo_rep_legal.label}</div>
+							<div class="field-value">
+								{#if selectedCliente.correo_rep_legal}
+									<a href="mailto:{selectedCliente.correo_rep_legal}">
+										{selectedCliente.correo_rep_legal}
+									</a>
 								{:else}
-									<span class="px-2 py-1 text-xs font-medium rounded-full bg-purple-100 text-purple-700">
-										Empresa
-									</span>
+									—
 								{/if}
 							</div>
-							<div>
-								<p class="text-xs text-secondary-500 mb-1">{F.usuario.label}</p>
-								<p class="text-sm text-secondary-700">{displayValue(selectedCliente.usuario)}</p>
-							</div>
-							<div>
-								<p class="text-xs text-secondary-500 mb-1">{F.tipo_usuario.label}</p>
-								<p class="text-sm text-secondary-700">{displayValue(selectedCliente.tipo_usuario)}</p>
-							</div>
+						</div>
+						<div>
+							<div class="field-label">{F.contacto_alternativo.label}</div>
+							<div class="field-value">{displayValue(selectedCliente.contacto_alternativo)}</div>
 						</div>
 					</div>
-				{/if}
-			</div>
-
-			<!-- Información de Contacto -->
-			<div class="border border-secondary-200 rounded-lg overflow-hidden">
-				<button 
-					type="button"
-					class="w-full flex items-center justify-between px-4 py-3 bg-secondary-50 text-left text-sm font-semibold text-secondary-900 hover:bg-secondary-100 transition-colors"
-					on:click={() => toggleModalSection('contacto')}
-				>
-					<span>Información de Contacto</span>
-					<svg class="w-5 h-5 transition-transform {modalSections.contacto ? 'rotate-180' : ''}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-					</svg>
-				</button>
-				{#if modalSections.contacto}
-					<div class="px-4 py-4 bg-white border-t border-secondary-200">
-						<div class="grid grid-cols-2 gap-4">
-							<div>
-								<p class="text-xs text-secondary-500 mb-1">{F.correo.label}</p>
-								<p class="text-sm text-secondary-700">
-									{#if selectedCliente.correo}
-										<a href="mailto:{selectedCliente.correo}" class="text-primary-600 hover:underline">
-											{selectedCliente.correo}
-										</a>
-									{:else}
-										—
-									{/if}
-								</p>
-							</div>
-							<div>
-								<p class="text-xs text-secondary-500 mb-1">{F.telefono_movil.label}</p>
-								<p class="text-sm text-secondary-700">{displayValue(selectedCliente.telefono_movil)}</p>
-							</div>
-							<div>
-								<p class="text-xs text-secondary-500 mb-1">{F.ciudad.label}</p>
-								<p class="text-sm text-secondary-700">{displayValue(selectedCliente.ciudad)}</p>
-							</div>
-							<div class="col-span-2">
-								<p class="text-xs text-secondary-500 mb-1">{F.direccion.label}</p>
-								<p class="text-sm text-secondary-700">{displayValue(selectedCliente.direccion)}</p>
-							</div>
-						</div>
-					</div>
-				{/if}
-			</div>
-
-			<!-- Datos Persona Natural (solo si es PERSONA) -->
-			{#if selectedCliente.tipo_persona === 'PERSONA'}
-				<div class="border border-secondary-200 rounded-lg overflow-hidden">
-					<button 
-						type="button"
-						class="w-full flex items-center justify-between px-4 py-3 bg-secondary-50 text-left text-sm font-semibold text-secondary-900 hover:bg-secondary-100 transition-colors"
-						on:click={() => toggleModalSection('persona')}
-					>
-						<span>Datos Personales</span>
-						<svg class="w-5 h-5 transition-transform {modalSections.persona ? 'rotate-180' : ''}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-						</svg>
-					</button>
-					{#if modalSections.persona}
-						<div class="px-4 py-4 bg-white border-t border-secondary-200">
-							<div class="grid grid-cols-2 gap-4">
-								<div class="col-span-2">
-									<p class="text-xs text-secondary-500 mb-1">{F.nombre.label}</p>
-									<p class="text-sm font-medium text-secondary-900">{displayValue(selectedCliente.nombre)}</p>
-								</div>
-								<div>
-									<p class="text-xs text-secondary-500 mb-1">{F.tipo_documento.label}</p>
-									<p class="text-sm text-secondary-700">{displayValue(selectedCliente.tipo_documento)}</p>
-								</div>
-								<div>
-									<p class="text-xs text-secondary-500 mb-1">{F.numero_documento.label}</p>
-									<p class="text-sm text-secondary-700">{displayValue(selectedCliente.numero_documento)}</p>
-								</div>
-								<div>
-									<p class="text-xs text-secondary-500 mb-1">{F.edad.label}</p>
-									<p class="text-sm text-secondary-700">{displayValue(selectedCliente.edad)}</p>
-								</div>
-							</div>
-						</div>
-					{/if}
-				</div>
-			{/if}
-
-			<!-- Datos Empresa (solo si es EMPRESA) -->
-			{#if selectedCliente.tipo_persona === 'EMPRESA'}
-				<div class="border border-secondary-200 rounded-lg overflow-hidden">
-					<button 
-						type="button"
-						class="w-full flex items-center justify-between px-4 py-3 bg-secondary-50 text-left text-sm font-semibold text-secondary-900 hover:bg-secondary-100 transition-colors"
-						on:click={() => toggleModalSection('empresa')}
-					>
-						<span>Datos de la Empresa</span>
-						<svg class="w-5 h-5 transition-transform {modalSections.empresa ? 'rotate-180' : ''}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-						</svg>
-					</button>
-					{#if modalSections.empresa}
-						<div class="px-4 py-4 bg-white border-t border-secondary-200">
-							<div class="grid grid-cols-2 gap-4">
-								<div class="col-span-2">
-									<p class="text-xs text-secondary-500 mb-1">{F.razon_social.label}</p>
-									<p class="text-sm font-medium text-secondary-900">{displayValue(selectedCliente.razon_social)}</p>
-								</div>
-								<div>
-									<p class="text-xs text-secondary-500 mb-1">{F.nit.label}</p>
-									<p class="text-sm text-secondary-700">{displayValue(selectedCliente.nit)}</p>
-								</div>
-								<div>
-									<p class="text-xs text-secondary-500 mb-1">{F.nombre_rep_legal.label}</p>
-									<p class="text-sm text-secondary-700">{displayValue(selectedCliente.nombre_rep_legal)}</p>
-								</div>
-								<div>
-									<p class="text-xs text-secondary-500 mb-1">{F.documento_rep_legal.label}</p>
-									<p class="text-sm text-secondary-700">{displayValue(selectedCliente.documento_rep_legal)}</p>
-								</div>
-								<div>
-									<p class="text-xs text-secondary-500 mb-1">{F.telefono_rep_legal.label}</p>
-									<p class="text-sm text-secondary-700">{displayValue(selectedCliente.telefono_rep_legal)}</p>
-								</div>
-								<div>
-									<p class="text-xs text-secondary-500 mb-1">{F.correo_rep_legal.label}</p>
-									<p class="text-sm text-secondary-700">
-										{#if selectedCliente.correo_rep_legal}
-											<a href="mailto:{selectedCliente.correo_rep_legal}" class="text-primary-600 hover:underline">
-												{selectedCliente.correo_rep_legal}
-											</a>
-										{:else}
-											—
-										{/if}
-									</p>
-								</div>
-								<div class="col-span-2">
-									<p class="text-xs text-secondary-500 mb-1">{F.contacto_alternativo.label}</p>
-									<p class="text-sm text-secondary-700">{displayValue(selectedCliente.contacto_alternativo)}</p>
-								</div>
-							</div>
-						</div>
-					{/if}
 				</div>
 			{/if}
 		</div>
 	{/if}
 
 	<svelte:fragment slot="footer">
-		<div class="flex justify-end gap-3">
-			<button 
-				type="button" 
-				class="btn btn-secondary"
-				on:click={() => showModal = false}
-			>
+		<div class="flex justify-end gap-2">
+			<button type="button" class="btn-secondary" on:click={() => (showModal = false)}>
 				Cerrar
 			</button>
-			<button 
-				type="button" 
-				class="btn btn-primary"
-				on:click={() => { showModal = false; editCliente(selectedCliente?.id || 0); }}
+			<button
+				type="button"
+				class="btn-primary"
+				on:click={() => {
+					showModal = false;
+					void goto(`/clientes/${selectedCliente?.id ?? 0}/editar`);
+				}}
 			>
 				Editar
 			</button>

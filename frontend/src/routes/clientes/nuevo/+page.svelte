@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { APP_NAME } from '$lib/config';
-	import { FormSection, FormField, Input, Select } from '$components';
+	import { FormField, FormSection, Input, PageHeader, Select } from '$components';
 	import { clienteService } from '$services';
 	import { ClienteFields } from '$constants';
 	import type { CreateClienteDto, TipoPersona } from '$lib/types/cliente';
@@ -148,23 +148,17 @@
 </svelte:head>
 
 <!-- Header -->
-<header class="page-header">
-	<div class="flex items-center gap-4">
-		<a href="/clientes" class="page-back-link">
-			<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-				<path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
-			</svg>
-			<span>Volver</span>
-		</a>
-	</div>
-</header>
+<div class="page-shell">
+	<PageHeader
+		title="Registro de nuevo cliente"
+		crumb="Inicio / Operación / Clientes"
+		backHref="/clientes"
+		backLabel="Volver a clientes"
+	/>
 
-<!-- Content -->
-<div class="page-content">
 	<div class="max-w-4xl mx-auto">
 		<form class="form-container" on:submit|preventDefault={handleSubmit}>
 			<!-- Form Title -->
-			<h1 class="form-title">Registro de Nuevo Cliente</h1>
 
 			<!-- Error Message -->
 			{#if error}
@@ -317,8 +311,7 @@
 					<FormField 
 						label={F.razon_social.label}
 						helper="Nombre legal de la empresa."
-						required
-					>
+						required wide>
 						<Input 
 							bind:value={formData.razon_social}
 							placeholder="Ej: Empresa ABC S.A.S"
@@ -344,8 +337,7 @@
 						<div class="grid grid-cols-2 gap-4">
 							<FormField 
 								label={F.nombre_rep_legal.label}
-								helper="Nombre completo."
-							>
+								helper="Nombre completo." wide>
 								<Input 
 									bind:value={formData.nombre_rep_legal}
 									placeholder="Ej: María García López"
@@ -378,8 +370,7 @@
 
 							<FormField 
 								label={F.correo_rep_legal.label}
-								helper="Correo electrónico."
-							>
+								helper="Correo electrónico." wide>
 								<Input 
 									type="email"
 									bind:value={formData.correo_rep_legal}
@@ -392,8 +383,7 @@
 
 					<FormField 
 						label={F.contacto_alternativo.label}
-						helper="Información de contacto alternativo."
-					>
+						helper="Información de contacto alternativo." wide>
 						<Input 
 							bind:value={formData.contacto_alternativo}
 							placeholder="Ej: Secretaría - 6012345678"
@@ -446,8 +436,7 @@
 
 				<FormField 
 					label={F.direccion.label}
-					helper="Dirección completa."
-				>
+					helper="Dirección completa." wide>
 					<Input 
 						bind:value={formData.direccion}
 						placeholder="Ej: Calle 123 #45-67, Barrio Centro"

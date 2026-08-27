@@ -3,7 +3,7 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { APP_NAME } from '$lib/config';
-	import { FormSection, FormField, Input, Select, CurrencyInput } from '$components';
+	import { CurrencyInput, FormField, FormSection, Input, PageHeader, Select } from '$components';
 	import { bienService, clienteService } from '$services';
 	import { CopropiedadFields } from '$constants';
 	import type { Cliente } from '$lib/types/cliente';
@@ -88,18 +88,14 @@
 	<title>Editar Copropiedad | {APP_NAME}</title>
 </svelte:head>
 
-<header class="page-header">
-	<div class="flex items-center gap-4">
-		<a href="/bienes" class="page-back-link">
-			<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-				<path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
-			</svg>
-			<span>Volver</span>
-		</a>
-	</div>
-</header>
+<div class="page-shell">
+	<PageHeader
+		title="Editar copropiedad #{id}"
+		crumb="Inicio / Operación / Bienes"
+		backHref="/bienes"
+		backLabel="Volver a bienes"
+	/>
 
-<div class="page-content">
 	<div class="max-w-4xl mx-auto">
 		{#if loading}
 			<div class="flex items-center justify-center py-12">
@@ -114,7 +110,6 @@
 			</div>
 		{:else}
 			<form class="form-container" on:submit|preventDefault={handleSubmit}>
-				<h1 class="form-title">Editar Copropiedad #{id}</h1>
 
 				{#if error}
 					<div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
@@ -130,7 +125,7 @@
 				</FormSection>
 
 				<FormSection title="Datos de la Copropiedad" bind:open={sections.datos.open}>
-					<div class="space-y-4">
+					<div class="field-pairs">
 						<FormField label={CopropiedadFields.tipo_copropiedad.label}>
 							<Select bind:value={formData.tipo_copropiedad} options={tipoCopropiedadOptions} disabled={saving} />
 						</FormField>
@@ -140,7 +135,7 @@
 						<FormField label={CopropiedadFields.ciudad.label}>
 							<Input bind:value={formData.ciudad} disabled={saving} />
 						</FormField>
-						<FormField label={CopropiedadFields.direccion.label}>
+						<FormField label={CopropiedadFields.direccion.label} wide>
 							<Input bind:value={formData.direccion} disabled={saving} />
 						</FormField>
 						<FormField label={CopropiedadFields.ano_construccion.label}>
@@ -150,7 +145,7 @@
 				</FormSection>
 
 				<FormSection title="Estructura" bind:open={sections.estructura.open}>
-					<div class="space-y-4">
+					<div class="field-pairs">
 						<FormField label={CopropiedadFields.numero_torres.label}>
 							<Input type="number" bind:value={formData.numero_torres} min="0" disabled={saving} />
 						</FormField>
@@ -163,7 +158,7 @@
 					</div>
 					<div class="border-t pt-4 mt-4">
 						<h4 class="text-sm font-semibold text-secondary-700 mb-4">Unidades</h4>
-						<div class="space-y-4">
+						<div class="field-pairs">
 							<FormField label={CopropiedadFields.cantidad_unidades_casa.label}>
 								<Input type="number" bind:value={formData.cantidad_unidades_casa} min="0" disabled={saving} />
 							</FormField>
@@ -184,7 +179,7 @@
 				</FormSection>
 
 				<FormSection title="Valores de Avalúo" bind:open={sections.valores.open}>
-					<div class="space-y-4">
+					<div class="field-pairs">
 						<FormField label={CopropiedadFields.valor_edificio_area_comun_avaluo.label}>
 							<CurrencyInput bind:value={formData.valor_edificio_area_comun_avaluo} disabled={saving} />
 						</FormField>
